@@ -1,48 +1,48 @@
 :root {
-  /* Light mode (default) - Claymorphism */
-  --bg-primary: #fdfaf5;
-  --bg-secondary: #f5f0e8;
-  --bg-header: #faf7f2;
-  --bg-hover: #f0e8dc;
-  --text-primary: #2c2416;
-  --text-secondary: #6b5f52;
-  --text-tertiary: #9a8b7e;
+  /* Light mode (default) - Modern Emerald */
+  --bg-primary: #f0fdf4;
+  --bg-secondary: #f0fdf4;
+  --bg-header: #ecfdf5;
+  --bg-hover: #dcfce7;
+  --text-primary: #065f46;
+  --text-secondary: #047857;
+  --text-tertiary: #059669;
   --border-color: transparent;
   --border-light: transparent;
-  --shadow-sm: 0 4px 12px rgba(80, 60, 40, 0.06);
-  --shadow-md: 0 8px 24px rgba(80, 60, 40, 0.1);
-  --shadow-lg: 0 20px 40px rgba(80, 60, 40, 0.12);
-  --shadow-color: rgba(80, 60, 40, 0.08);
-  --accent: #c8963a;
-  --accent-light: #e8d7c3;
+  --shadow-sm: 0 4px 12px rgba(5, 94, 61, 0.06);
+  --shadow-md: 0 8px 24px rgba(5, 94, 61, 0.1);
+  --shadow-lg: 0 20px 40px rgba(5, 94, 61, 0.12);
+  --shadow-color: rgba(5, 94, 61, 0.08);
+  --accent: #055e3d;
+  --accent-light: #10b981;
   --clay-warm: #d4a574;
-  --clay-water: #5db8b8;
-  --clay-earth: #8b7355;
-  --clay-soft: rgba(200, 150, 58, 0.08);
+  --clay-water: #34d399;
+  --clay-earth: #059669;
+  --clay-soft: rgba(5, 94, 61, 0.08);
 }
 
 [data-theme="dark"],
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #1a1612;
-    --bg-secondary: #2a2318;
-    --bg-header: #201d18;
-    --bg-hover: #2f2a24;
-    --text-primary: #f5f0e8;
-    --text-secondary: #c9b8a8;
-    --text-tertiary: #9a8b7e;
+    --bg-primary: #064e3b;
+    --bg-secondary: #047857;
+    --bg-header: #055e3d;
+    --bg-hover: #059669;
+    --text-primary: #f0fdf4;
+    --text-secondary: #d1fae5;
+    --text-tertiary: #a7f3d0;
     --border-color: transparent;
     --border-light: transparent;
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
     --shadow-color: rgba(0, 0, 0, 0.4);
-    --accent: #d4a574;
-    --accent-light: #3a2f24;
-    --clay-warm: #c8963a;
-    --clay-water: #5db8b8;
-    --clay-earth: #a67c52;
-    --clay-soft: rgba(200, 150, 58, 0.1);
+    --accent: #34d399;
+    --accent-light: #10b981;
+    --clay-warm: #d4a574;
+    --clay-water: #6ee7b7;
+    --clay-earth: #10b981;
+    --clay-soft: rgba(16, 185, 129, 0.1);
   }
 }
 
