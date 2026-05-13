@@ -2,6 +2,7 @@ import { FirebaseError } from "firebase/app";
 import {
   signInWithEmailAndPassword,
   signOut as fbSignOut,
+  updatePassword as fbUpdatePassword,
   type User,
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -43,6 +44,26 @@ export async function getUserProfile(uid: string) {
   const ref = doc(firestore, "users", uid);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
+}
+
+export async function updatePassword(newPassword: string): Promise<void> {
+  try {
+    if (!auth.currentUser) {
+      throw new Error("Nenhum usuário autenticado.");
+    }
+    await fbUpdatePassword(auth.currentUser, newPassword);
+  } catch (err) {
+    if (err instanceof FirebaseError) {
+      if (err.code === "auth/weak-password") {
+        throw new Error("Senha muito fraca. Use ao menos 6 caracteres.");
+      }
+      if (err.code === "auth/requires-recent-login") {
+        throw new Error("Faça login novamente para mudar a senha.");
+      }
+      throw new Error("Erro ao atualizar senha. Tente novamente.");
+    }
+    throw err;
+  }
 }
 
 function translateAuthError(code: string): string {
