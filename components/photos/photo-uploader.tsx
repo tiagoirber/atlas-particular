@@ -21,14 +21,20 @@ export function PhotoUploader({
   const [error, setError] = useState("");
 
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log("PhotoUploader.handleChange triggered", e.target.files?.length);
     const list = e.target.files;
     e.target.value = "";
-    if (!list || list.length === 0) return;
+    if (!list || list.length === 0) {
+      console.log("No files selected");
+      return;
+    }
     const files = Array.from(list);
+    console.log("Files to upload:", files.length);
 
     for (const f of files) {
       const v = validateImageFile(f);
       if (!v.ok) {
+        console.log("Validation failed:", v.reason);
         setError(v.reason || "Arquivo inválido.");
         return;
       }
@@ -36,8 +42,10 @@ export function PhotoUploader({
     setError("");
     setBusy(true);
     try {
+      console.log("Calling onSelect with", files.length, "files");
       await onSelect(files);
     } catch (err) {
+      console.error("Upload error:", err);
       setError(err instanceof Error ? err.message : "Erro ao enviar imagens.");
     } finally {
       setBusy(false);
