@@ -1,0 +1,388 @@
+.main {
+  padding: 4rem 1.5rem;
+  min-height: 100vh;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding-bottom: 5rem;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  height: 60vh;
+  max-height: 640px;
+  overflow: hidden;
+}
+
+.heroImg,
+.heroPlaceholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.heroPlaceholder {
+  background: linear-gradient(135deg, #667eea33, #764ba233);
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.72) 100%);
+  display: flex;
+  align-items: flex-end;
+}
+
+.heroInner {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 3rem 1.5rem;
+  color: white;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  margin: 0 0 0.75rem;
+  opacity: 0.85;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.meta {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.tags {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tags li {
+  font-size: 0.78rem;
+  padding: 0.2rem 0.65rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  text-transform: lowercase;
+}
+
+.section {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.body {
+  margin: 0;
+  line-height: 1.75;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.factGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.25rem 0;
+}
+
+.factGrid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.factLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.factValue {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.moment h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.moment p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.notes {
+  background: var(--bg-hover);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+}
+
+.notes h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.notes p {
+  margin: 0;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sectionHeader p {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+}
+
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search,
+.select {
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.empty {
+  color: var(--text-secondary);
+  padding: 2rem 0;
+}
+
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  border-left: 1px solid var(--border-color);
+  padding-left: 1.5rem;
+}
+
+.dayBlock {
+  position: relative;
+}
+
+.dayBlock::before {
+  content: "";
+  position: absolute;
+  left: -1.93rem;
+  top: 0.4rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--text-primary);
+  border: 3px solid var(--bg-primary);
+}
+
+.dayHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.dayOrder {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.dayDate {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.dayTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.daySummary {
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+.attractions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.attCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.attCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px var(--shadow-color);
+}
+
+.attCover {
+  aspect-ratio: 4 / 3;
+  background: var(--bg-hover);
+}
+
+.attCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.attCoverPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea22, #764ba222);
+}
+
+.attBody {
+  padding: 0.85rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.attBadge {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  align-self: flex-start;
+}
+
+.attBody h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.attLocation {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.attDescription {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.adminBar {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 1.5rem;
+}
+
+.adminLink {
+  display: inline-block;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.adminLink:hover {
+  background: var(--bg-hover);
+}

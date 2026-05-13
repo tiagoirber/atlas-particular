@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ⚠️ Substitua os UIDs abaixo pelos UIDs dos administradores autorizados
+    // (Console → Authentication → Users → copiar UID).
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in [
+          "REPLACE_WITH_ADMIN_UID_1"
+          // , "REPLACE_WITH_ADMIN_UID_2"
+        ];
+    }
+
+    function isPublishedPublic(trip) {
+      return trip.status == "published" && trip.isPublic == true;
+    }
+
+    // Coleção raiz de viagens
+    match /trips/{tripId} {
+      allow read: if isAdmin() || isPublishedPublic(resource.data);
+      allow create, update, delete: if isAdmin();
+
+      match /days/{dayId} {
+        allow read: if isAdmin()
+          || isPublishedPublic(get(/databases/$(database)/documents/trips/$(tripId)).data);
+        allow create, update, delete: if isAdmin();
+      }
+
+      match /attractions/{attractionId} {
+        allow read: if isAdmin()
+          || isPublishedPublic(get(/databases/$(database)/documents/trips/$(tripId)).data);
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    // Perfis (opcional). Apenas o próprio admin lê/edita seu doc.
+    match /users/{userId} {
+      allow read, write: if isAdmin() && request.auth.uid == userId;
+    }
+
+    // Default deny — qualquer outra rota é bloqueada.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

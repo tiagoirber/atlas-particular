@@ -1,0 +1,47 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drop {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 1.4rem;
+  text-align: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.drop:hover {
+  border-color: #667eea;
+  color: var(--text-primary);
+}
+
+.drop input {
+  display: none;
+}
+
+.drop small {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.busy {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.error {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  background: rgba(211, 47, 47, 0.08);
+  color: #c62828;
+  border: 1px solid rgba(211, 47, 47, 0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}

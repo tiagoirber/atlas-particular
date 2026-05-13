@@ -1,0 +1,125 @@
+.main {
+  padding: 3rem 1.5rem 5rem;
+  min-height: calc(100vh - 120px);
+}
+
+.section {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.header p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.empty {
+  color: var(--text-secondary);
+  padding: 4rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.05));
+  border-radius: 25% 15% 20% 30%;
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.card {
+  border: none;
+  border-radius: 25% 15% 22% 28%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--shadow-md);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+}
+
+.cover {
+  aspect-ratio: 16/9;
+  background: var(--bg-hover);
+  overflow: hidden;
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .cover img {
+  transform: scale(1.05);
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.destination {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dates {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: auto;
+}

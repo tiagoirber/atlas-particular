@@ -1,0 +1,38 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ⚠️ Substitua os UIDs pelos administradores autorizados.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in [
+          "REPLACE_WITH_ADMIN_UID_1"
+          // , "REPLACE_WITH_ADMIN_UID_2"
+        ];
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches("image/(jpeg|jpg|png|webp)");
+    }
+
+    function sizeOk() {
+      return request.resource.size <= 8 * 1024 * 1024;
+    }
+
+    // Pastas estruturadas em trips/{tripId}/...
+    match /trips/{tripId}/{allPaths=**} {
+      // Leitura pública dos arquivos é necessária para mostrar imagens
+      // de viagens publicadas — o Firestore controla a visibilidade
+      // de quais viagens existem.
+      allow read: if true;
+
+      allow write: if isAdmin() && isImage() && sizeOk();
+      allow delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
