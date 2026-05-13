@@ -1,4 +1,4 @@
-import { TripForm } from "@/components/trips/trip-form";
+import { TripFormWizard } from "@/components/trips/trip-form-wizard";
 import styles from "../trips.module.css";
 
 export default function NewTripPage() {
@@ -6,9 +6,9 @@ export default function NewTripPage() {
     <section className={styles.formContainer}>
       <header className={styles.formHeader}>
         <h1>Nova viagem</h1>
-        <p>Preencha os dados gerais. Você pode adicionar dias, atrações e fotos depois.</p>
+        <p>Vamos começar? Complete os 6 passos para registrar sua viagem.</p>
       </header>
-      <TripForm />
+      <TripFormWizard />
     </section>
   );
 }

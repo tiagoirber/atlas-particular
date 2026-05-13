@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTrips } from "@/hooks/useTrips";
 import { useAuth } from "@/lib/auth-context";
+import { formatDateRange } from "@/utils/date";
 import { TripCardGrid } from "@/components/trips/trip-card-grid";
 import styles from "./dashboard.module.css";
 
@@ -11,24 +12,33 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { trips, loading, error, refresh } = useTrips();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published">(
-    "all",
-  );
+
+  const sorted = useMemo(() => {
+    return [...trips].sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || 0;
+      const bTime = b.createdAt?.toMillis?.() || 0;
+      return bTime - aTime;
+    });
+  }, [trips]);
+
+  const lastTrip = sorted[0];
+  const pendingDrafts = useMemo(() => {
+    return sorted.filter((t) => t.status === "draft").slice(0, 5);
+  }, [sorted]);
 
   const filtered = useMemo(() => {
+    if (!search.trim()) return sorted;
     const term = search.trim().toLowerCase();
-    return trips.filter((trip) => {
-      if (statusFilter !== "all" && trip.status !== statusFilter) return false;
-      if (!term) return true;
+    return sorted.filter((trip) => {
       return (
         trip.title?.toLowerCase().includes(term) ||
         trip.destination?.toLowerCase().includes(term) ||
         trip.country?.toLowerCase().includes(term) ||
         trip.city?.toLowerCase().includes(term) ||
-        trip.searchKeywords?.some((k) => k.includes(term))
+        trip.searchKeywords?.some((k) => k.toLowerCase().includes(term))
       );
     });
-  }, [trips, search, statusFilter]);
+  }, [sorted, search]);
 
   const counts = useMemo(() => {
     return {
@@ -42,10 +52,10 @@ export default function DashboardPage() {
     <section className={styles.container}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>Olá{user?.email ? `, ${user.email}` : ""}</p>
+          <p className={styles.eyebrow}>Bem-vindo de volta</p>
           <h1 className={styles.title}>Atlas Particular</h1>
           <p className={styles.subtitle}>
-            Seu acervo de viagens. Cadastre, edite e revisite cada destino.
+            Seu acervo privado de viagens. Registre, edite e reviva cada destino.
           </p>
         </div>
         <Link href="/admin/trips/new" className={styles.cta}>
@@ -53,71 +63,122 @@ export default function DashboardPage() {
         </Link>
       </header>
 
-      <ul className={styles.stats}>
-        <li>
+      {/* Last Voyage Section */}
+      {lastTrip && (
+        <section className={styles.lastVoyageSection}>
+          <h2 className={styles.sectionTitle}>Última viagem</h2>
+          <Link href={`/admin/trips/${lastTrip.id}`} className={styles.lastVoyageCard}>
+            {lastTrip.coverImageUrl && (
+              <div className={styles.lastVoyageImage}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={lastTrip.coverImageUrl} alt={lastTrip.title} />
+              </div>
+            )}
+            <div className={styles.lastVoyageContent}>
+              <div className={styles.lastVoyageHeader}>
+                <h3>{lastTrip.title}</h3>
+                <span className={`${styles.badge} ${styles[`badge${lastTrip.status}`]}`}>
+                  {lastTrip.status === "draft" ? "Rascunho" : "Publicada"}
+                </span>
+              </div>
+              <p className={styles.lastVoyageDestination}>
+                {lastTrip.destination}, {lastTrip.country}
+              </p>
+              <p className={styles.lastVoyageDate}>
+                {formatDateRange(lastTrip.startDate, lastTrip.endDate)}
+              </p>
+              {lastTrip.generalDescription && (
+                <p className={styles.lastVoyageDescription}>
+                  {lastTrip.generalDescription.substring(0, 150)}
+                  {lastTrip.generalDescription.length > 150 ? "…" : ""}
+                </p>
+              )}
+            </div>
+          </Link>
+        </section>
+      )}
+
+      {/* Pending Drafts Section */}
+      {pendingDrafts.length > 0 && (
+        <section className={styles.draftSection}>
+          <h2 className={styles.sectionTitle}>Rascunhos em progresso</h2>
+          <ul className={styles.draftList}>
+            {pendingDrafts.map((draft) => (
+              <li key={draft.id}>
+                <Link href={`/admin/trips/${draft.id}`} className={styles.draftItem}>
+                  <div className={styles.draftIcon}>📝</div>
+                  <div className={styles.draftInfo}>
+                    <div className={styles.draftTitle}>{draft.title}</div>
+                    <div className={styles.draftMeta}>
+                      {draft.destination}, {draft.country}
+                    </div>
+                  </div>
+                  <div className={styles.draftArrow}>→</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {pendingDrafts.length > 0 && (
+            <Link href="/admin/dashboard?filter=draft" className={styles.seeAllLink}>
+              Ver todos os rascunhos ({counts.draft})
+            </Link>
+          )}
+        </section>
+      )}
+
+      {/* Stats */}
+      <div className={styles.statsContainer}>
+        <div className={styles.statCard}>
           <span className={styles.statValue}>{counts.total}</span>
           <span className={styles.statLabel}>Viagens</span>
-        </li>
-        <li>
+        </div>
+        <div className={styles.statCard}>
           <span className={styles.statValue}>{counts.published}</span>
           <span className={styles.statLabel}>Publicadas</span>
-        </li>
-        <li>
+        </div>
+        <div className={styles.statCard}>
           <span className={styles.statValue}>{counts.draft}</span>
           <span className={styles.statLabel}>Rascunhos</span>
-        </li>
-      </ul>
+        </div>
+      </div>
 
-      <div className={styles.controls}>
+      {/* Search & Browse */}
+      <section className={styles.browseSection}>
+        <h2 className={styles.sectionTitle}>Todas as viagens</h2>
         <input
           type="search"
-          placeholder="Buscar por título, destino, cidade…"
+          placeholder="Buscar por título, destino, cidade ou tag…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.search}
         />
-        <div className={styles.tabs} role="tablist">
-          {(["all", "draft", "published"] as const).map((status) => (
-            <button
-              key={status}
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === status}
-              className={`${styles.tab} ${statusFilter === status ? styles.tabActive : ""}`}
-              onClick={() => setStatusFilter(status)}
-            >
-              {status === "all"
-                ? "Todas"
-                : status === "draft"
-                  ? "Rascunhos"
-                  : "Publicadas"}
+
+        {error && (
+          <p className={styles.error}>
+            {error}{" "}
+            <button onClick={refresh} className={styles.linkBtn}>
+              tentar de novo
             </button>
-          ))}
-        </div>
-      </div>
+          </p>
+        )}
 
-      {error && (
-        <p className={styles.error}>
-          {error}{" "}
-          <button onClick={refresh} className={styles.linkBtn}>
-            tentar de novo
-          </button>
-        </p>
-      )}
-
-      {loading ? (
-        <p className={styles.empty}>Carregando…</p>
-      ) : filtered.length === 0 ? (
-        <div className={styles.emptyState}>
-          <h2>Nada por aqui ainda</h2>
-          <p>Comece cadastrando sua primeira viagem.</p>
-          <Link href="/admin/trips/new" className={styles.cta}>
-            + Nova viagem
-          </Link>
-        </div>
-      ) : (
-        <TripCardGrid trips={filtered} onChanged={refresh} />
-      )}
+        {loading ? (
+          <p className={styles.empty}>Carregando viagens…</p>
+        ) : filtered.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>
+              {search ? "Nenhuma viagem encontrada com essa busca." : "Você ainda não registrou nenhuma viagem."}
+            </p>
+            {!search && (
+              <Link href="/admin/trips/new" className={styles.cta}>
+                + Nova viagem
+              </Link>
+            )}
+          </div>
+        ) : (
+          <TripCardGrid trips={filtered} onChanged={refresh} />
+        )}
+      </section>
     </section>
   );
 }

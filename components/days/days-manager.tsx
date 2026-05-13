@@ -136,22 +136,22 @@ export function DaysManager({ tripId, onChanged }: Props) {
           {days.map((day) => (
             <li key={day.id} className={styles.dayCard}>
               <div className={styles.dayHeader}>
-                <span className={styles.order}>Dia {day.order + 1}</span>
-                <span className={styles.date}>{formatLongDate(day.date)}</span>
+                <span className={styles.dayBadge}>Dia {day.order + 1}</span>
+                <span className={styles.dayDate}>{formatLongDate(day.date)}</span>
               </div>
               {day.title && <h3>{day.title}</h3>}
               {day.summary && <p className={styles.summary}>{day.summary}</p>}
-              {day.notes && <p className={styles.notes}>{day.notes}</p>}
+              {day.notes && <p className={styles.notes}>📝 {day.notes}</p>}
               <div className={styles.cardActions}>
                 <button type="button" onClick={() => startEdit(day)} className={styles.linkBtn}>
-                  Editar
+                  ✏️ Editar
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDelete(day)}
                   className={`${styles.linkBtn} ${styles.danger}`}
                 >
-                  Excluir
+                  🗑️ Excluir
                 </button>
               </div>
             </li>
