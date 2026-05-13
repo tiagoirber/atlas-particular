@@ -22,13 +22,12 @@ export function PhotoUploader({
 
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("PhotoUploader.handleChange triggered", e.target.files?.length);
-    const list = e.target.files;
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (!list || list.length === 0) {
+    if (files.length === 0) {
       console.log("No files selected");
       return;
     }
-    const files = Array.from(list);
     console.log("Files to upload:", files.length);
 
     for (const f of files) {
