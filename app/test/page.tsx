@@ -203,7 +203,7 @@ export default function TestPage() {
               {result.status === 'pending' && '⏳ '}
               {result.name}
             </div>
-            <div style={{ fontSize: '0.9rem', color: '#333' }}>
+            <div style={{ fontSize: "0.9rem", color: "#333" }}>
               {result.message}
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function TestPage() {
             <ul>
               <li>Adicionar uma foto de capa (testar upload de foto)</li>
               <li>Verificar que as atrações foram criadas automaticamente</li>
-              <li>Navegar para a aba "Atrações" para confirmar</li>
+              <li>Navegar para a aba &quot;Atrações&quot; para confirmar</li>
             </ul>
           </p>
         </div>
@@ -259,11 +259,11 @@ export default function TestPage() {
         </p>
         <ol>
           <li>
-            <strong>Photo Upload:</strong> Vá para uma viagem existente, etapa "Foto de capa",
-            e faça upload de uma imagem. Deve completar rapidamente sem ficar preso em "Enviando...".
+            <strong>Photo Upload:</strong> Vá para uma viagem existente, etapa &quot;Foto de capa&quot;,
+            e faça upload de uma imagem. Deve completar rapidamente sem ficar preso em &quot;Enviando...&quot;.
           </li>
           <li>
-            <strong>Attractions Step:</strong> Crie uma nova viagem. Quando chegar à etapa "Atrações",
+            <strong>Attractions Step:</strong> Crie uma nova viagem. Quando chegar à etapa &quot;Atrações&quot;,
             a viagem deve ser salva automaticamente e você pode adicionar atrações com fotos.
           </li>
         </ol>
