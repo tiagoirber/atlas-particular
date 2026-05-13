@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTrips } from "@/hooks/useTrips";
 import { useAuth } from "@/lib/auth-context";
-import { formatDateRange } from "@/utils/date";
+import { formatDateRange, toDate } from "@/utils/date";
 import { TripCardGrid } from "@/components/trips/trip-card-grid";
 import styles from "./dashboard.module.css";
 
@@ -15,8 +15,8 @@ export default function DashboardPage() {
 
   const sorted = useMemo(() => {
     return [...trips].sort((a, b) => {
-      const aTime = a.createdAt?.toMillis?.() || 0;
-      const bTime = b.createdAt?.toMillis?.() || 0;
+      const aTime = toDate(a.createdAt)?.getTime() ?? 0;
+      const bTime = toDate(b.createdAt)?.getTime() ?? 0;
       return bTime - aTime;
     });
   }, [trips]);

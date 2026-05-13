@@ -548,8 +548,8 @@ export function TripFormWizard({ trip }: Props) {
             </div>
 
             <div className={styles.field}>
-              <fieldset>
-                <legend>Status da viagem</legend>
+              <div className={styles.fieldset}>
+                <div className={styles.fieldsetLegend}>Status da viagem</div>
                 <label className={styles.radio}>
                   <input
                     type="radio"
@@ -570,7 +570,7 @@ export function TripFormWizard({ trip }: Props) {
                   />
                   Publicada (finalizada)
                 </label>
-              </fieldset>
+              </div>
             </div>
 
             {form.status === "published" && (

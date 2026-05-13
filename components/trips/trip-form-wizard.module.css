@@ -421,13 +421,13 @@
   padding: 0;
 }
 
-fieldset {
+.fieldset {
   border: none;
   padding: 0;
   margin: 0;
 }
 
-fieldset legend {
+.fieldsetLegend {
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
