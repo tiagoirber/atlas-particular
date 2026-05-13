@@ -170,43 +170,33 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   }
 
   async function uploadCover(file: File) {
-    console.log("uploadCover called with file:", file.name);
     const check = validateImageFile(file);
     if (!check.ok) {
-      console.log("File validation failed:", check.reason);
       setActionError(check.reason || "Arquivo inválido.");
       return;
     }
-    console.log("File validation passed, starting upload");
     setSaving(true);
     setActionError("");
     try {
       let currentId = editingId;
       if (!currentId) {
-        console.log("No editingId, creating new attraction");
         if (!draft.title.trim()) {
-          console.log("No title, cannot create");
           setActionError("Informe o nome da atração antes de fazer upload.");
           setSaving(false);
           return;
         }
         currentId = await createAttraction(tripId, draft);
-        console.log("Created attraction with id:", currentId);
         setEditingId(currentId);
       }
-      console.log("Uploading cover to tripId:", tripId, "attractionId:", currentId);
       const oldPath = draft.coverImagePath;
       const { url, storagePath } = await uploadAttractionCover(tripId, currentId, file);
-      console.log("Upload successful, url:", url);
       await updateAttractionCover(tripId, currentId, url, storagePath);
       setDraft((d) => ({ ...d, coverImageUrl: url, coverImagePath: storagePath }));
       if (oldPath && oldPath !== storagePath) {
         deleteFromStorage(oldPath).catch(() => undefined);
       }
       await refresh();
-      console.log("uploadCover completed successfully");
     } catch (err) {
-      console.error("uploadCover error:", err);
       setActionError(err instanceof Error ? err.message : "Erro no upload.");
     } finally {
       setSaving(false);

@@ -51,7 +51,8 @@
       "Bash(./add_env.sh)",
       "Bash(vercel redeploy *)",
       "Bash(vercel --prod --force)",
-      "Bash(firebase --version)"
+      "Bash(firebase --version)",
+      "Bash(vercel deploy *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\User\\OneDrive\\Claude Code\\Cartografia �ntima"
