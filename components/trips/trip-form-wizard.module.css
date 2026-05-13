@@ -534,3 +534,14 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.loadingMessage {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.attractionsSection {
+  margin-top: 1.5rem;
+}

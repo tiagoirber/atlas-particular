@@ -9,13 +9,14 @@ import { uploadTripCover, deleteFromStorage } from "@/lib/storage-service";
 import { toInputDate } from "@/utils/date";
 import { parseCsv, toCsv } from "@/utils/format";
 import { validateImageFile } from "@/utils/validators";
+import { AttractionsManager } from "@/components/attractions/attractions-manager";
 import styles from "./trip-form-wizard.module.css";
 
 interface Props {
   trip?: TripDoc | null;
 }
 
-type Step = "basics" | "dates" | "description" | "cover" | "tags" | "review";
+type Step = "basics" | "dates" | "description" | "cover" | "attractions" | "tags" | "review";
 
 function emptyForm(): TripFormData {
   return {
@@ -90,15 +91,18 @@ export function TripFormWizard({ trip }: Props) {
   );
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [savedTripId, setSavedTripId] = useState<string | null>(trip?.id ?? null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const steps: Step[] = ["basics", "dates", "description", "cover", "tags", "review"];
+  const steps: Step[] = ["basics", "dates", "description", "cover", "attractions", "tags", "review"];
   const stepLabels: Record<Step, string> = {
     basics: "Informações básicas",
     dates: "Datas",
     description: "Descrição",
     cover: "Foto de capa",
+    attractions: "Atrações",
     tags: "Tags e viajantes",
     review: "Revisar e publicar",
   };
@@ -125,6 +129,8 @@ export function TripFormWizard({ trip }: Props) {
         return true;
       case "cover":
         return true;
+      case "attractions":
+        return true;
       case "tags":
         return true;
       case "review":
@@ -140,15 +146,41 @@ export function TripFormWizard({ trip }: Props) {
     setSuccess("");
   }
 
-  function nextStep() {
+  async function nextStep() {
     if (!canProceed()) {
       setError("Por favor, preencha os campos obrigatórios.");
       return;
     }
     const currentIndex = steps.indexOf(currentStep);
-    if (currentIndex < steps.length - 1) {
-      goToStep(steps[currentIndex + 1]);
+    if (currentIndex >= steps.length - 1) return;
+
+    const nextStepKey = steps[currentIndex + 1];
+
+    // Auto-save trip before attractions step (for new trips)
+    if (nextStepKey === "attractions" && !savedTripId && !isEditing && user) {
+      setAutoSaving(true);
+      setError("");
+      try {
+        const payload: TripFormData = {
+          ...form,
+          tags: parseCsv(tagsInput),
+          travelerNames: parseCsv(travelersInput),
+          status: "draft",
+        };
+        const id = await createTrip(user.uid, payload);
+        setSavedTripId(id);
+        setSuccess("Viagem salva! Agora adicione suas atrações.");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Erro ao salvar viagem antes de adicionar atrações.",
+        );
+        setAutoSaving(false);
+        return;
+      }
+      setAutoSaving(false);
     }
+
+    goToStep(nextStepKey);
   }
 
   function prevStep() {
@@ -211,6 +243,11 @@ export function TripFormWizard({ trip }: Props) {
         await updateTrip(trip.id, payload);
         setSuccess("Viagem atualizada com sucesso!");
         setTimeout(() => router.push("/admin/dashboard"), 1500);
+      } else if (savedTripId) {
+        // Trip was auto-saved when entering attractions step
+        await updateTrip(savedTripId, payload);
+        setSuccess("Viagem finalizada com sucesso!");
+        setTimeout(() => router.push(`/admin/trips/${savedTripId}`), 1500);
       } else {
         const id = await createTrip(user.uid, payload);
         router.push(`/admin/trips/${id}`);
@@ -478,7 +515,25 @@ export function TripFormWizard({ trip }: Props) {
           </div>
         )}
 
-        {/* Step 5: Tags and Travelers */}
+        {/* Step 5: Attractions */}
+        {currentStep === "attractions" && (
+          <div className={styles.step}>
+            <h2>Atrações e lugares visitados</h2>
+            <p className={styles.stepDescription}>
+              Adicione os lugares que visitou, com fotos e descrições detalhadas.
+            </p>
+
+            {autoSaving ? (
+              <p className={styles.loadingMessage}>Salvando viagem…</p>
+            ) : savedTripId ? (
+              <div className={styles.attractionsSection}>
+                <AttractionsManager tripId={savedTripId} />
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {/* Step 6: Tags and Travelers */}
         {currentStep === "tags" && (
           <div className={styles.step}>
             <h2>Tags e viajantes</h2>
@@ -594,7 +649,7 @@ export function TripFormWizard({ trip }: Props) {
           <button
             type="button"
             onClick={prevStep}
-            disabled={steps.indexOf(currentStep) === 0 || saving}
+            disabled={steps.indexOf(currentStep) === 0 || saving || autoSaving}
             className={styles.prevBtn}
           >
             ← Anterior
@@ -603,7 +658,7 @@ export function TripFormWizard({ trip }: Props) {
           {currentStep === "review" ? (
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || autoSaving}
               className={styles.submitBtn}
             >
               {saving ? "Salvando…" : isEditing ? "Salvar alterações" : "Publicar viagem"}
@@ -611,11 +666,11 @@ export function TripFormWizard({ trip }: Props) {
           ) : (
             <button
               type="button"
-              onClick={nextStep}
-              disabled={saving}
+              onClick={() => nextStep()}
+              disabled={saving || autoSaving}
               className={styles.nextBtn}
             >
-              Próximo →
+              {autoSaving ? "Salvando…" : "Próximo →"}
             </button>
           )}
         </div>
