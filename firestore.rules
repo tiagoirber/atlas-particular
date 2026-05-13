@@ -2,13 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ⚠️ Substitua os UIDs abaixo pelos UIDs dos administradores autorizados
-    // (Console → Authentication → Users → copiar UID).
     function isAdmin() {
       return request.auth != null
         && request.auth.uid in [
-          "REPLACE_WITH_ADMIN_UID_1"
-          // , "REPLACE_WITH_ADMIN_UID_2"
+          "ouWnI4m0G1hPk7zHfXrUMziBGEu2",
+          "5uybKsChJDM9XTaGhAYgPd72MHc2"
         ];
     }
 
