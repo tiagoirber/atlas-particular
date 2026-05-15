@@ -21,10 +21,9 @@ export function PhotoUploader({
   const [error, setError] = useState("");
 
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const list = e.target.files;
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (!list || list.length === 0) return;
-    const files = Array.from(list);
+    if (files.length === 0) return;
 
     for (const f of files) {
       const v = validateImageFile(f);

@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { TripDoc, TripFormData } from "@/types/trip";
 import { useAuth } from "@/lib/auth-context";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { createTrip, updateTrip } from "@/lib/trips-service";
 import { uploadTripCover, deleteFromStorage } from "@/lib/storage-service";
 import { toInputDate } from "@/utils/date";
@@ -106,6 +107,19 @@ export function TripFormWizard({ trip }: Props) {
     tags: "Tags e viajantes",
     review: "Revisar e publicar",
   };
+
+  // Detectar mudanças não salvas
+  const hasUnsavedChanges = useMemo(() => {
+    if (!trip) return false; // Nova viagem, deixa livres as mudanças
+    const original = fromTrip(trip);
+    return (
+      JSON.stringify(form) !== JSON.stringify(original) ||
+      toCsv(trip.tags) !== tagsInput ||
+      toCsv(trip.travelerNames) !== travelersInput
+    );
+  }, [form, trip, tagsInput, travelersInput]);
+
+  useUnsavedChanges(hasUnsavedChanges && !saving);
 
   useEffect(() => {
     if (trip) {

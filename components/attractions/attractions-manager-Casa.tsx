@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useAttractions } from "@/hooks/useAttractions";
 import { useDays } from "@/hooks/useDays";
-import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import {
   createAttraction,
   updateAttraction,
@@ -106,18 +105,9 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState<AttractionFormData>(emptyForm(0));
-  const [originalDraft, setOriginalDraft] = useState<AttractionFormData | null>(null);
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
   const [filterDayId, setFilterDayId] = useState<string>("");
-
-  // Detectar mudanças não salvas
-  const hasUnsavedChanges = useMemo(() => {
-    if (!editingId || !originalDraft) return false;
-    return JSON.stringify(draft) !== JSON.stringify(originalDraft);
-  }, [draft, originalDraft, editingId]);
-
-  useUnsavedChanges(hasUnsavedChanges && !saving);
 
   const filtered = useMemo(() => {
     if (!filterDayId) return attractions;
@@ -127,25 +117,20 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   function startCreate() {
     setEditingId(null);
     setCreating(true);
-    const emptyFormData = emptyForm(attractions.length);
-    setDraft(emptyFormData);
-    setOriginalDraft(emptyFormData);
+    setDraft(emptyForm(attractions.length));
     setActionError("");
   }
 
   function startEdit(att: AttractionDoc) {
     setCreating(false);
     setEditingId(att.id);
-    const fromDocData = fromDoc(att);
-    setDraft(fromDocData);
-    setOriginalDraft(fromDocData);
+    setDraft(fromDoc(att));
     setActionError("");
   }
 
   function cancel() {
     setCreating(false);
     setEditingId(null);
-    setOriginalDraft(null);
     setActionError("");
   }
 
@@ -185,7 +170,6 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   }
 
   async function uploadCover(file: File) {
-    if (!editingId) return;
     const check = validateImageFile(file);
     if (!check.ok) {
       setActionError(check.reason || "Arquivo inválido.");
@@ -194,19 +178,26 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     setSaving(true);
     setActionError("");
     try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de fazer upload.");
+          setSaving(false);
+          return;
+        }
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
       const oldPath = draft.coverImagePath;
-      const { url, storagePath } = await uploadAttractionCover(tripId, editingId, file);
-      await updateAttractionCover(tripId, editingId, url, storagePath);
+      const { url, storagePath } = await uploadAttractionCover(tripId, currentId, file);
+      await updateAttractionCover(tripId, currentId, url, storagePath);
       setDraft((d) => ({ ...d, coverImageUrl: url, coverImagePath: storagePath }));
       if (oldPath && oldPath !== storagePath) {
-        await deleteFromStorage(oldPath).catch(() => undefined);
+        deleteFromStorage(oldPath).catch(() => undefined);
       }
       await refresh();
-      setSuccess("✅ Foto da atração enviada com sucesso!");
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao enviar foto";
-      setActionError(`❌ ${errorMsg}. Tente novamente ou verifique sua conexão.`);
-      console.error("uploadCover error:", err);
+      setActionError(err instanceof Error ? err.message : "Erro no upload.");
     } finally {
       setSaving(false);
     }
@@ -222,25 +213,31 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   }
 
   async function handleUploadPhotos(files: File[]) {
-    if (!editingId) return;
     setSaving(true);
     setActionError("");
     try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de fazer upload.");
+          setSaving(false);
+          return;
+        }
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
       const uploaded: Photo[] = [];
       const base = draft.photos?.length || 0;
       for (let i = 0; i < files.length; i++) {
-        const photo = await uploadAttractionPhoto(tripId, editingId, files[i]);
+        const photo = await uploadAttractionPhoto(tripId, currentId, files[i]);
         uploaded.push({ ...photo, order: base + i });
       }
       const updated = [...(draft.photos || []), ...uploaded];
-      await setAttractionPhotos(tripId, editingId, updated);
+      await setAttractionPhotos(tripId, currentId, updated);
       setDraft((d) => ({ ...d, photos: updated }));
       await refresh();
-      setSuccess(`✅ ${files.length} foto(s) adicionada(s) com sucesso!`);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao enviar fotos";
-      setActionError(`❌ ${errorMsg}. Tente novamente ou verifique sua conexão.`);
-      console.error("handleUploadPhotos error:", err);
+      setActionError(err instanceof Error ? err.message : "Erro no upload.");
     } finally {
       setSaving(false);
     }
@@ -491,9 +488,7 @@ function AttractionForm({
 
       <div className={styles.formSection}>
         <h3 className={styles.formSectionTitle}>Foto principal</h3>
-        {!isEditing ? (
-          <p className={styles.hint}>Salve a atração antes de enviar fotos.</p>
-        ) : draft.coverImageUrl ? (
+        {draft.coverImageUrl ? (
           <div className={styles.coverPreview}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={draft.coverImageUrl} alt="Capa da atração" />
@@ -709,24 +704,18 @@ function AttractionForm({
 
       <div className={styles.formSection}>
         <h3 className={styles.formSectionTitle}>Galeria de fotos</h3>
-        {!isEditing ? (
-          <p className={styles.hint}>Salve a atração antes de enviar fotos.</p>
-        ) : (
-          <>
-            <PhotoUploader
-              label="Adicionar fotos à galeria"
-              multiple
-              disabled={saving}
-              onSelect={onUploadPhotos}
-            />
-            <PhotoGallery
-              photos={draft.photos || []}
-              editable
-              onRemove={onRemovePhoto}
-              onCaptionChange={onCaptionChange}
-            />
-          </>
-        )}
+        <PhotoUploader
+          label="Adicionar fotos à galeria"
+          multiple
+          disabled={saving}
+          onSelect={onUploadPhotos}
+        />
+        <PhotoGallery
+          photos={draft.photos || []}
+          editable
+          onRemove={onRemovePhoto}
+          onCaptionChange={onCaptionChange}
+        />
       </div>
 
       <div className={styles.formActions}>

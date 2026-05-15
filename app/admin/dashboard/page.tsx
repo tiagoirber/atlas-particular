@@ -15,8 +15,8 @@ export default function DashboardPage() {
 
   const sorted = useMemo(() => {
     return [...trips].sort((a, b) => {
-      const aTime = toDate(a.createdAt)?.getTime() ?? 0;
-      const bTime = toDate(b.createdAt)?.getTime() ?? 0;
+      const aTime = toDate(a.createdAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const bTime = toDate(b.createdAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
       return bTime - aTime;
     });
   }, [trips]);
