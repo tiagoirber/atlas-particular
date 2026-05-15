@@ -1,5 +1,9 @@
 # CLAUDE.md — Atlas Particular
 
+**⚠️ INSTRUÇÃO PERMANENTE E IMUTÁVEL**: Você deve conversar APENAS em **Português do Brasil**. Não importa a língua da pergunta ou contexto — responda sempre em pt-BR. Esta é uma regra fixa.
+
+---
+
 This document is the source of truth for context, conventions, and guardrails. Read it before substantial changes. Update it when you discover new patterns or issues.
 
 ---
