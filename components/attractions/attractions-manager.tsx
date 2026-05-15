@@ -186,7 +186,6 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   }
 
   async function uploadCover(file: File) {
-    if (!editingId) return;
     const check = validateImageFile(file);
     if (!check.ok) {
       setActionError(check.reason || "Arquivo inválido.");
@@ -195,9 +194,20 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     setSaving(true);
     setActionError("");
     try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de fazer upload.");
+          setSaving(false);
+          return;
+        }
+        // Auto-save atração antes de fazer upload da foto
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
       const oldPath = draft.coverImagePath;
-      const { url, storagePath } = await uploadAttractionCover(tripId, editingId, file);
-      await updateAttractionCover(tripId, editingId, url, storagePath);
+      const { url, storagePath } = await uploadAttractionCover(tripId, currentId, file);
+      await updateAttractionCover(tripId, currentId, url, storagePath);
       setDraft((d) => ({ ...d, coverImageUrl: url, coverImagePath: storagePath }));
       if (oldPath && oldPath !== storagePath) {
         await deleteFromStorage(oldPath).catch(() => undefined);
@@ -223,18 +233,28 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   }
 
   async function handleUploadPhotos(files: File[]) {
-    if (!editingId) return;
     setSaving(true);
     setActionError("");
     try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de fazer upload.");
+          setSaving(false);
+          return;
+        }
+        // Auto-save atração antes de fazer upload das fotos
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
       const uploaded: Photo[] = [];
       const base = draft.photos?.length || 0;
       for (let i = 0; i < files.length; i++) {
-        const photo = await uploadAttractionPhoto(tripId, editingId, files[i]);
+        const photo = await uploadAttractionPhoto(tripId, currentId, files[i]);
         uploaded.push({ ...photo, order: base + i });
       }
       const updated = [...(draft.photos || []), ...uploaded];
-      await setAttractionPhotos(tripId, editingId, updated);
+      await setAttractionPhotos(tripId, currentId, updated);
       setDraft((d) => ({ ...d, photos: updated }));
       await refresh();
       setActionSuccess(`✅ ${files.length} foto(s) adicionada(s) com sucesso!`);
@@ -493,9 +513,7 @@ function AttractionForm({
 
       <div className={styles.formSection}>
         <h3 className={styles.formSectionTitle}>Foto principal</h3>
-        {!isEditing ? (
-          <p className={styles.hint}>Salve a atração antes de enviar fotos.</p>
-        ) : draft.coverImageUrl ? (
+        {draft.coverImageUrl ? (
           <div className={styles.coverPreview}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={draft.coverImageUrl} alt="Capa da atração" />
@@ -711,24 +729,18 @@ function AttractionForm({
 
       <div className={styles.formSection}>
         <h3 className={styles.formSectionTitle}>Galeria de fotos</h3>
-        {!isEditing ? (
-          <p className={styles.hint}>Salve a atração antes de enviar fotos.</p>
-        ) : (
-          <>
-            <PhotoUploader
-              label="Adicionar fotos à galeria"
-              multiple
-              disabled={saving}
-              onSelect={onUploadPhotos}
-            />
-            <PhotoGallery
-              photos={draft.photos || []}
-              editable
-              onRemove={onRemovePhoto}
-              onCaptionChange={onCaptionChange}
-            />
-          </>
-        )}
+        <PhotoUploader
+          label="Adicionar fotos à galeria"
+          multiple
+          disabled={saving}
+          onSelect={onUploadPhotos}
+        />
+        <PhotoGallery
+          photos={draft.photos || []}
+          editable
+          onRemove={onRemovePhoto}
+          onCaptionChange={onCaptionChange}
+        />
       </div>
 
       <div className={styles.formActions}>
