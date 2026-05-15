@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTrip } from "@/hooks/useTrips";
+import { deleteTrip } from "@/lib/trips-service";
 import { TripForm } from "@/components/trips/trip-form";
 import { DaysManager } from "@/components/days/days-manager";
 import { AttractionsManager } from "@/components/attractions/attractions-manager";
@@ -15,8 +17,29 @@ interface PageProps {
 }
 
 export default function EditTripPage({ params }: PageProps) {
+  const router = useRouter();
   const { trip, loading, error, refresh } = useTrip(params.id);
   const [tab, setTab] = useState<Tab>("info");
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!trip) return;
+
+    const confirmed = window.confirm(
+      `Excluir "${trip.title}"?\n\nEsta ação é irreversível. Todas as atrações e fotos serão deletadas.`
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await deleteTrip(params.id);
+      router.push("/admin/dashboard");
+    } catch (err) {
+      alert(`Erro ao excluir viagem: ${err instanceof Error ? err.message : "Desconhecido"}`);
+      setDeleting(false);
+    }
+  }
 
   if (loading) {
     return <p className={styles.formHeader}>Carregando viagem…</p>;
@@ -79,6 +102,15 @@ export default function EditTripPage({ params }: PageProps) {
         >
           Visualizar ↗
         </Link>
+        <button
+          type="button"
+          className={`${styles.tab} ${styles.tabDanger}`}
+          onClick={handleDelete}
+          disabled={deleting}
+          title="Excluir viagem"
+        >
+          {deleting ? "Excluindo…" : "🗑️ Excluir"}
+        </button>
       </nav>
 
       {tab === "info" && <TripForm trip={trip} />}

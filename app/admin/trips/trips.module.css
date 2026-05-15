@@ -64,3 +64,19 @@
   color: var(--text-primary);
   border-bottom-color: var(--text-primary);
 }
+
+.tabDanger {
+  color: #d32f2f;
+  margin-left: auto;
+}
+
+.tabDanger:hover {
+  color: #b71c1c;
+  background-color: rgba(211, 47, 47, 0.08);
+  border-radius: 4px;
+}
+
+.tabDanger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
