@@ -109,6 +109,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   const [originalDraft, setOriginalDraft] = useState<AttractionFormData | null>(null);
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
   const [filterDayId, setFilterDayId] = useState<string>("");
 
   // Detectar mudanças não salvas
@@ -202,7 +203,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         await deleteFromStorage(oldPath).catch(() => undefined);
       }
       await refresh();
-      setSuccess("✅ Foto da atração enviada com sucesso!");
+      setActionSuccess("✅ Foto da atração enviada com sucesso!");
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao enviar foto";
       setActionError(`❌ ${errorMsg}. Tente novamente ou verifique sua conexão.`);
@@ -236,7 +237,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       await setAttractionPhotos(tripId, editingId, updated);
       setDraft((d) => ({ ...d, photos: updated }));
       await refresh();
-      setSuccess(`✅ ${files.length} foto(s) adicionada(s) com sucesso!`);
+      setActionSuccess(`✅ ${files.length} foto(s) adicionada(s) com sucesso!`);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao enviar fotos";
       setActionError(`❌ ${errorMsg}. Tente novamente ou verifique sua conexão.`);
@@ -304,6 +305,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       </header>
 
       {actionError && <p className={styles.error}>{actionError}</p>}
+      {actionSuccess && <p className={styles.success}>{actionSuccess}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       {(creating || editingId) && (
