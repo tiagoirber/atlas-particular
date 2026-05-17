@@ -471,7 +471,7 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-05-13)
+### Current State (as of 2026-05-17)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
@@ -484,20 +484,22 @@ Mark these moments in your work:
 - Responsive design (mobile-first CSS)
 - Toast notifications + confirmation dialogs
 - Deployed to Vercel (auto-redeploy on main push)
+- Delete de viagens implementado
+- Upload de galeria durante criação de atração (auto-save antes do upload)
 
 ⚠️ **Known Issues**:
-- `/app/preview-colors/` is temporary — should be deleted
+- `/app/test/` é uma página temporária — deve ser deletada
 - No dark mode toggle UI (system preference only)
 - No pagination on large trip lists (could be slow 100+ trips)
 
 🔄 **In Progress / Planned**:
-- None currently
+- Rotação da Firebase API Key (ver seção abaixo — PENDENTE)
 
 ### Immediate Next Steps
 
-1. **Delete `/app/preview-colors/`** (temporary demo page)
-2. **Test the golden paths** on production Vercel URL
-3. **Start second feature**: Document what's next
+1. **[URGENTE] Concluir rotação da Firebase API Key** — ver seção 13 abaixo
+2. **Delete `/app/test/`** (página temporária de testes)
+3. **Test the golden paths** on production Vercel URL
 
 ### Future Considerations
 
@@ -506,6 +508,54 @@ Mark these moments in your work:
 - **Analytics**: Track user behavior (trips published, days edited, etc.)
 - **Sharing**: Generate shareable links with expiry
 - **Comments**: Allow public comments on trips (guestbook)
+
+---
+
+## 13. Segurança — Rotação da Firebase API Key (PENDENTE)
+
+### Contexto (2026-05-17)
+
+O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta no arquivo `add_env.sh`, que foi commitado por engano.
+
+**O que já foi feito:**
+- `add_env.sh` removido do repositório (commit `c6e9bd0`)
+- `add_env.sh` adicionado ao `.gitignore`
+- Histórico antigo contém a chave, mas o repo é privado — risco baixo
+
+**Chave exposta (já comprometida, rotacionar):**
+- `AIzaSyALm1hc4e61BPKo2jRtAEt1e8VwDsr0XS4`
+- É a "Browser key (auto created by Firebase)" no Google Cloud Console
+
+**Nota importante:** A API Key do Firebase para web é pública por design — fica no bundle JS do cliente. A segurança real vem das Firestore Security Rules. Mas é boa prática rotacionar após exposição.
+
+### Passos para concluir a rotação
+
+**Passo 1 — Gerar nova chave no Google Cloud Console:**
+1. Acesse: `console.cloud.google.com/apis/credentials?project=atlas-particular`
+2. Na linha "Browser key (auto created by Firebase)", clique no ícone de **lápis (Editar)**
+3. No topo da página de edição, clique em **"Alternar chave"**
+4. Confirme — uma nova chave será gerada
+5. Copie o novo valor da chave
+
+**Passo 2 — Atualizar o `.env.local` localmente:**
+```bash
+# No arquivo .env.local, atualizar:
+NEXT_PUBLIC_FIREBASE_API_KEY=<nova-chave-aqui>
+```
+
+**Passo 3 — Atualizar a variável na Vercel:**
+1. Acesse o painel da Vercel → projeto atlas-particular → Settings → Environment Variables
+2. Encontre `NEXT_PUBLIC_FIREBASE_API_KEY`
+3. Atualize o valor para a nova chave
+4. Salve e faça um redeploy (ou push para main)
+
+**Passo 4 — Verificar que o app funciona:**
+- Testar login, dashboard, criação de viagem, upload de foto
+- Confirmar que o Vercel fez build sem erros
+
+**Passo 5 — Dismissar o alerta no GitHub:**
+- Acesse: `github.com/tiagoirber/atlas-particular` → aba **Security** → **Secret scanning**
+- Clique no alerta → **Dismiss** → motivo: "Revoked" (já que a chave foi rotacionada)
 
 ---
 
@@ -519,6 +569,6 @@ Mark these moments in your work:
 
 ---
 
-**Last updated**: 2026-05-13  
+**Last updated**: 2026-05-17  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
