@@ -52,10 +52,22 @@
       "Bash(vercel redeploy *)",
       "Bash(vercel --prod --force)",
       "Bash(firebase --version)",
-      "Bash(vercel deploy *)"
+      "Bash(vercel deploy *)",
+      "Bash(git -C \"c:\\\\Users\\\\tiago\\\\OneDrive\\\\1\\) APPs\\\\Claude Code\\\\Atlas Particular\" log --oneline -10)",
+      "Bash(git config *)",
+      "PowerShell($env:PATH += \";C:\\\\Program Files\\\\nodejs\"; cd \"c:\\\\Users\\\\tiago\\\\OneDrive\\\\1\\) APPs\\\\Claude Code\\\\Atlas Particular\"; npm run typecheck 2>&1)",
+      "PowerShell(Get-Command npm -ErrorAction SilentlyContinue; Get-ChildItem \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:APPDATA\\\\npm\\\\npm.cmd\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:ProgramFiles\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object -First 5)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"C:\\\\Program Files \\(x86\\)\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name)",
+      "PowerShell(Get-ChildItem \"C:\\\\\" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"node|npm\" } | Select-Object FullName)",
+      "Bash(node node_modules/.bin/tsc --noEmit)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"c:\\\\Users\\\\irber\\\\OneDrive\\\\1\\) APPs\\\\Claude Code\\\\Atlas Particular\"; npm run typecheck 2>&1)",
+      "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object Name -First 5)",
+      "PowerShell($gitPath = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath\\) { & $gitPath --version } else { \"Git não encontrado em Program Files\" }; $gitPath2 = \"C:\\\\Users\\\\irber\\\\AppData\\\\Local\\\\Programs\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath2\\) { & $gitPath2 --version } else { \"Git não encontrado em AppData\" })"
     ],
     "additionalDirectories": [
-      "C:\\Users\\User\\OneDrive\\Claude Code\\Cartografia �ntima"
+      "C:\\Users\\User\\OneDrive\\Claude Code\\Cartografia �ntima",
+      "c:\\Users\\User\\.claude\\projects\\c--Users-User-OneDrive-Claude-Code-Atlas-Particular\\memory"
     ]
   }
 }

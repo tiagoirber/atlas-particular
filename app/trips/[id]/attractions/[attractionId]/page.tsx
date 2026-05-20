@@ -13,6 +13,7 @@ import {
 import type { AttractionDoc } from "@/types/attraction";
 import type { TripDoc } from "@/types/trip";
 import { PhotoGallery } from "@/components/photos/photo-gallery";
+import { VideoGallery } from "@/components/photos/video-gallery";
 import { formatLongDate } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
 import styles from "./attraction-viewer.module.css";
@@ -216,6 +217,13 @@ export default function AttractionViewerPage({ params }: Props) {
           <section className={styles.section}>
             <h2>Galeria</h2>
             <PhotoGallery photos={att.photos} />
+          </section>
+        )}
+
+        {att.videos && att.videos.length > 0 && (
+          <section className={styles.section}>
+            <h2>Vídeos</h2>
+            <VideoGallery videos={att.videos} />
           </section>
         )}
 

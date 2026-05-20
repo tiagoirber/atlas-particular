@@ -486,6 +486,7 @@ Mark these moments in your work:
 - Deployed to Vercel (auto-redeploy on main push)
 - Delete de viagens implementado
 - Upload de galeria durante criação de atração (auto-save antes do upload)
+- **Upload de vídeos por atração** (múltiplos, MP4/WebM/MOV, até 500 MB, progresso em tempo real)
 
 ⚠️ **Known Issues**:
 - `/app/test/` é uma página temporária — deve ser deletada
@@ -494,11 +495,13 @@ Mark these moments in your work:
 
 🔄 **In Progress / Planned**:
 - Rotação da Firebase API Key (ver seção abaixo — PENDENTE)
+- **[PENDENTE] Rodar `npm run typecheck` e `npm run lint`** após feature de vídeos (Node.js não estava disponível na sessão anterior)
 
 ### Immediate Next Steps
 
 1. **[URGENTE] Concluir rotação da Firebase API Key** — ver seção 13 abaixo
-2. **Delete `/app/test/`** (página temporária de testes)
+2. **Rodar `npm run typecheck && npm run lint`** para validar a feature de vídeos antes de commitar
+3. **Delete `/app/test/`** (página temporária de testes)
 3. **Test the golden paths** on production Vercel URL
 
 ### Future Considerations
@@ -569,6 +572,6 @@ NEXT_PUBLIC_FIREBASE_API_KEY=<nova-chave-aqui>
 
 ---
 
-**Last updated**: 2026-05-17  
+**Last updated**: 2026-05-17 (vídeos por atração)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance

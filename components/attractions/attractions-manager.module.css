@@ -81,6 +81,14 @@
   border: 1px solid rgba(211, 47, 47, 0.2);
 }
 
+.success {
+  background: rgba(46, 125, 50, 0.08);
+  color: #2e7d32;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(46, 125, 50, 0.2);
+}
+
 .empty {
   padding: 1.5rem;
   color: var(--text-secondary);
@@ -147,7 +155,7 @@
 .field textarea {
   padding: 0.75rem;
   border: none;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 10px;
   font-size: 0.95rem;
   font-family: inherit;
   color: var(--text-primary);
@@ -191,8 +199,9 @@
 .coverPreview img {
   width: 100%;
   display: block;
-  max-height: 320px;
-  object-fit: cover;
+  max-height: 400px;
+  object-fit: contain;
+  background: var(--bg-hover);
 }
 
 .removeCoverBtn {

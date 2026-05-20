@@ -26,6 +26,33 @@ export function validateImageFile(file: File): ImageValidationResult {
   return { ok: true };
 }
 
+export const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime", // .mov
+];
+
+export const MAX_VIDEO_BYTES = 500 * 1024 * 1024; // 500 MB
+
+export interface VideoValidationResult {
+  ok: boolean;
+  reason?: string;
+}
+
+export function validateVideoFile(file: File): VideoValidationResult {
+  if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+    return {
+      ok: false,
+      reason: `Formato não suportado. Aceitos: MP4, WebM, MOV.`,
+    };
+  }
+  if (file.size > MAX_VIDEO_BYTES) {
+    const mb = (MAX_VIDEO_BYTES / 1024 / 1024).toFixed(0);
+    return { ok: false, reason: `Vídeo maior que ${mb} MB.` };
+  }
+  return { ok: true };
+}
+
 export function isNonEmpty(value: string | undefined | null): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }

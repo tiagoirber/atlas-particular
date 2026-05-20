@@ -19,6 +19,7 @@ import type {
   AttractionFormData,
 } from "@/types/attraction";
 import type { Photo } from "@/types/photo";
+import type { Video } from "@/types/video";
 import { fromInputDate, toDate } from "@/utils/date";
 import { deleteFromStorage } from "./storage-service";
 
@@ -70,6 +71,7 @@ function sanitize(data: AttractionFormData) {
     coverImageUrl: data.coverImageUrl || "",
     coverImagePath: data.coverImagePath || "",
     photos: (data.photos || []) as Photo[],
+    videos: (data.videos || []) as Video[],
     order: Number(data.order) || 0,
   };
 }
@@ -109,6 +111,7 @@ export async function deleteAttraction(
       const paths = [
         data.coverImagePath,
         ...(data.photos || []).map((p) => p.storagePath),
+        ...(data.videos || []).map((v) => v.storagePath),
       ].filter((p): p is string => !!p);
       await Promise.allSettled(paths.map((p) => deleteFromStorage(p)));
     }
@@ -173,6 +176,17 @@ export async function setAttractionPhotos(
 ): Promise<void> {
   await updateDoc(attrDoc(tripId, attractionId), {
     photos,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function setAttractionVideos(
+  tripId: string,
+  attractionId: string,
+  videos: Video[],
+): Promise<void> {
+  await updateDoc(attrDoc(tripId, attractionId), {
+    videos,
     updatedAt: serverTimestamp(),
   });
 }
