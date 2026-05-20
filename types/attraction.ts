@@ -1,6 +1,7 @@
 import type { Timestamp } from "firebase/firestore";
 import type { AnyDate } from "@/utils/date";
 import type { Photo } from "./photo";
+import type { Video } from "./video";
 
 export type AttractionType =
   | "cachoeira"
@@ -68,7 +69,8 @@ export interface AttractionBase {
   risksOrWarnings?: string;
   coverImageUrl?: string;
   coverImagePath?: string;
-  photos: import("./photo").Photo[];
+  photos: Photo[];
+  videos: Video[];
   order: number;
 }
 
@@ -79,6 +81,7 @@ export interface AttractionDoc extends AttractionBase {
   updatedAt: Timestamp | Date | string;
 }
 
-export type AttractionFormData = Omit<AttractionBase, "photos"> & {
+export type AttractionFormData = Omit<AttractionBase, "photos" | "videos"> & {
   photos?: Photo[];
+  videos?: Video[];
 };

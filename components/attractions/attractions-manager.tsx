@@ -9,11 +9,13 @@ import {
   updateAttraction,
   deleteAttraction,
   setAttractionPhotos,
+  setAttractionVideos,
   updateAttractionCover,
 } from "@/lib/attractions-service";
 import {
   uploadAttractionCover,
   uploadAttractionPhoto,
+  uploadAttractionVideo,
   deleteFromStorage,
 } from "@/lib/storage-service";
 import { validateImageFile } from "@/utils/validators";
@@ -27,8 +29,11 @@ import {
   type DifficultyLevel,
 } from "@/types/attraction";
 import type { Photo } from "@/types/photo";
+import type { Video } from "@/types/video";
 import { PhotoUploader } from "@/components/photos/photo-uploader";
 import { PhotoGallery } from "@/components/photos/photo-gallery";
+import { VideoUploader } from "@/components/photos/video-uploader";
+import { VideoGallery } from "@/components/photos/video-gallery";
 import styles from "./attractions-manager.module.css";
 
 interface Props {
@@ -65,6 +70,7 @@ function emptyForm(order: number): AttractionFormData {
     coverImageUrl: "",
     coverImagePath: "",
     photos: [],
+    videos: [],
     order,
   };
 }
@@ -95,6 +101,7 @@ function fromDoc(att: AttractionDoc): AttractionFormData {
     coverImageUrl: att.coverImageUrl || "",
     coverImagePath: att.coverImagePath || "",
     photos: att.photos || [],
+    videos: att.videos || [],
     order: att.order || 0,
   };
 }
@@ -287,6 +294,55 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     setDraft((d) => ({ ...d, photos: updated }));
   }
 
+  async function handleUploadVideo(file: File, onProgress: (pct: number) => void) {
+    setSaving(true);
+    setActionError("");
+    try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de fazer upload.");
+          setSaving(false);
+          return;
+        }
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
+      const base = draft.videos?.length || 0;
+      const video = await uploadAttractionVideo(tripId, currentId, file, onProgress);
+      const updated: Video[] = [...(draft.videos || []), { ...video, order: base }];
+      await setAttractionVideos(tripId, currentId, updated);
+      setDraft((d) => ({ ...d, videos: updated }));
+      await refresh();
+      setActionSuccess("✅ Vídeo adicionado com sucesso!");
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erro desconhecido ao enviar vídeo";
+      setActionError(`❌ ${errorMsg}. Tente novamente ou verifique sua conexão.`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeVideo(video: Video) {
+    if (!editingId) return;
+    const remaining = (draft.videos || []).filter(
+      (v) => v.storagePath !== video.storagePath,
+    );
+    await setAttractionVideos(tripId, editingId, remaining);
+    setDraft((d) => ({ ...d, videos: remaining }));
+    if (video.storagePath) await deleteFromStorage(video.storagePath);
+    await refresh();
+  }
+
+  async function changeVideoCaption(video: Video, caption: string) {
+    if (!editingId) return;
+    const updated = (draft.videos || []).map((v) =>
+      v.storagePath === video.storagePath ? { ...v, caption } : v,
+    );
+    await setAttractionVideos(tripId, editingId, updated);
+    setDraft((d) => ({ ...d, videos: updated }));
+  }
+
   function updateDraft<K extends keyof AttractionFormData>(
     key: K,
     value: AttractionFormData[K],
@@ -342,6 +398,9 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
           onUploadPhotos={handleUploadPhotos}
           onRemovePhoto={removePhoto}
           onCaptionChange={changeCaption}
+          onUploadVideo={handleUploadVideo}
+          onRemoveVideo={removeVideo}
+          onVideoCaptionChange={changeVideoCaption}
         />
       )}
 
@@ -420,6 +479,9 @@ interface FormProps {
   onUploadPhotos: (files: File[]) => Promise<void>;
   onRemovePhoto: (photo: Photo) => void;
   onCaptionChange: (photo: Photo, caption: string) => void;
+  onUploadVideo: (file: File, onProgress: (pct: number) => void) => Promise<void>;
+  onRemoveVideo: (video: Video) => void;
+  onVideoCaptionChange: (video: Video, caption: string) => void;
 }
 
 function AttractionForm({
@@ -435,6 +497,9 @@ function AttractionForm({
   onUploadPhotos,
   onRemovePhoto,
   onCaptionChange,
+  onUploadVideo,
+  onRemoveVideo,
+  onVideoCaptionChange,
 }: FormProps) {
   return (
     <div className={styles.formCard}>
@@ -740,6 +805,21 @@ function AttractionForm({
           editable
           onRemove={onRemovePhoto}
           onCaptionChange={onCaptionChange}
+        />
+      </div>
+
+      <div className={styles.formSection}>
+        <h3 className={styles.formSectionTitle}>Vídeos</h3>
+        <VideoUploader
+          label="Adicionar vídeo"
+          disabled={saving}
+          onSelect={onUploadVideo}
+        />
+        <VideoGallery
+          videos={draft.videos || []}
+          editable
+          onRemove={onRemoveVideo}
+          onCaptionChange={onVideoCaptionChange}
         />
       </div>
 

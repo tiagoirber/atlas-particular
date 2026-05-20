@@ -1,6 +1,7 @@
 import {
   ref,
   uploadBytes,
+  uploadBytesResumable,
   getDownloadURL,
   deleteObject,
   listAll,
@@ -8,7 +9,8 @@ import {
 import { Timestamp } from "firebase/firestore";
 import { storage } from "./firebase";
 import type { ImageRef, Photo } from "@/types/photo";
-import { validateImageFile } from "@/utils/validators";
+import type { Video } from "@/types/video";
+import { validateImageFile, validateVideoFile } from "@/utils/validators";
 
 function sanitizeFileName(name: string): string {
   const lastDot = name.lastIndexOf(".");
@@ -74,6 +76,37 @@ export async function uploadAttractionPhoto(
     order: 0,
     uploadedAt: Timestamp.now(),
   };
+}
+
+export async function uploadAttractionVideo(
+  tripId: string,
+  attractionId: string,
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<Video> {
+  const check = validateVideoFile(file);
+  if (!check.ok) throw new Error(check.reason);
+
+  const filename = sanitizeFileName(file.name);
+  const storagePath = `trips/${tripId}/attractions/${attractionId}/videos/${filename}`;
+  const objectRef = ref(storage, storagePath);
+
+  await new Promise<void>((resolve, reject) => {
+    const task = uploadBytesResumable(objectRef, file, { contentType: file.type });
+    task.on(
+      "state_changed",
+      (snap) => {
+        if (onProgress) {
+          onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
+        }
+      },
+      reject,
+      resolve,
+    );
+  });
+
+  const url = await getDownloadURL(objectRef);
+  return { url, storagePath, caption: "", order: 0, uploadedAt: Timestamp.now() };
 }
 
 export async function deleteFromStorage(storagePath: string): Promise<void> {

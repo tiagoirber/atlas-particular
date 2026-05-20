@@ -1,0 +1,68 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.item {
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.player {
+  width: 100%;
+  display: block;
+  max-height: 480px;
+  background: #000;
+}
+
+.editRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.captionInput {
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.captionInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.removeBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.3rem;
+  transition: color 0.15s, background 0.15s;
+}
+
+.removeBtn:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.caption {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
