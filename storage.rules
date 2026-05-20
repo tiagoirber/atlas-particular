@@ -10,8 +10,16 @@ service firebase.storage {
       return request.resource.contentType.matches("image/(jpeg|jpg|png|webp)");
     }
 
-    function sizeOk() {
-      return request.resource.size <= 8 * 1024 * 1024;
+    function isVideo() {
+      return request.resource.contentType.matches("video/(mp4|webm|quicktime|x-m4v)");
+    }
+
+    function imageSizeOk() {
+      return request.resource.size <= 8 * 1024 * 1024; // 8 MB
+    }
+
+    function videoSizeOk() {
+      return request.resource.size <= 500 * 1024 * 1024; // 500 MB
     }
 
     // Pastas estruturadas em trips/{tripId}/...
@@ -23,7 +31,10 @@ service firebase.storage {
       allow read: if true;
 
       // Allow authenticated users to write/delete (Firestore enforces trip ownership)
-      allow write, delete: if isAuthenticated() && isImage() && sizeOk();
+      allow write, delete: if isAuthenticated() && (
+        (isImage() && imageSizeOk()) ||
+        (isVideo() && videoSizeOk())
+      );
     }
 
     // Default deny
