@@ -2,6 +2,15 @@
 
 **⚠️ INSTRUÇÃO PERMANENTE E IMUTÁVEL**: Você deve conversar APENAS em **Português do Brasil**. Não importa a língua da pergunta ou contexto — responda sempre em pt-BR. Esta é uma regra fixa.
 
+**⚠️ REGRA PERMANENTE — VERIFICAÇÃO OBRIGATÓRIA ANTES DE ENTREGAR**: Antes de declarar qualquer tarefa como pronta ou concluída, você DEVE executar o checklist de verificação abaixo. Nunca diga "está funcionando" sem evidência concreta. Se não puder testar algo (ex: Node.js indisponível, sem acesso ao browser), diga isso explicitamente e instrua o usuário sobre o que verificar manualmente. Use `/verify` para o processo completo.
+
+### Checklist mínimo de entrega (obrigatório em toda tarefa):
+1. **Reler os arquivos modificados** — confirmar que a mudança está correta e completa
+2. **Tentar typecheck/lint** — `npm run typecheck && npm run lint` (se Node.js disponível)
+3. **Confirmar commit no Git** — `git log --oneline -3` e `git status` limpo
+4. **Verificar lógica** — a mudança resolve o problema? quebra algum golden path?
+5. **Reportar honestamente** — separar o que foi verificado do que não foi possível verificar
+
 ---
 
 This document is the source of truth for context, conventions, and guardrails. Read it before substantial changes. Update it when you discover new patterns or issues.
