@@ -1,4 +1,4 @@
-.main {
+﻿.main {
   padding: 4rem 1.5rem;
   min-height: 100vh;
   max-width: 760px;
@@ -34,7 +34,7 @@
 }
 
 .heroPlaceholder {
-  background: linear-gradient(135deg, #667eea33, #764ba233);
+  background: var(--bg-secondary);
 }
 
 .heroOverlay {

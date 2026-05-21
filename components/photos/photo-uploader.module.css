@@ -1,4 +1,4 @@
-.wrap {
+﻿.wrap {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -18,7 +18,7 @@
 }
 
 .drop:hover {
-  border-color: #667eea;
+  border-color: var(--accent);
   color: var(--text-primary);
 }
 

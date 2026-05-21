@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   max-width: 720px;
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@
   margin: 0;
   font-size: 1.85rem;
   font-weight: 700;
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
@@ -32,7 +32,7 @@
   color: var(--text-primary);
   padding: 0.2rem 0.4rem;
   border-radius: 6px;
-  font-family: "Courier New", monospace;
+  font-family: var(--font-data);
   font-size: 0.85rem;
 }
 
@@ -42,12 +42,11 @@
 }
 
 .card {
-  border: 1px solid rgba(200, 150, 58, 0.15);
-  border-radius: 25% 15% 20% 30%;
+  border: 1px solid var(--bg-hover);
+  border-radius: 4px;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.05));
+  background: var(--bg-secondary);
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
 }
 
 .cardTitle {
@@ -55,7 +54,7 @@
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-primary);
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
 }
 
 .infoList {
@@ -83,25 +82,24 @@
 .infoItem dd {
   margin: 0;
   padding: 0.75rem 1rem;
-  background: rgba(200, 150, 58, 0.08);
+  background: var(--bg-hover);
   border-radius: 12px;
   color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .monospace {
-  font-family: "Courier New", monospace;
+  font-family: var(--font-data);
   font-size: 0.85rem;
   word-break: break-all;
 }
 
 .formCard {
-  border: 1px solid rgba(200, 150, 58, 0.15);
-  border-radius: 25% 15% 20% 30%;
+  border: 1px solid var(--bg-hover);
+  border-radius: 4px;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.05));
+  background: var(--bg-secondary);
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
 }
 
 @media (max-width: 640px) {

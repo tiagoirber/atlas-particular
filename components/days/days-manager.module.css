@@ -1,4 +1,4 @@
-.section {
+﻿.section {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -20,7 +20,7 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
   color: var(--text-primary);
 }
 
@@ -33,14 +33,14 @@
 .primary,
 .secondary {
   padding: 0.75rem 1.25rem;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 4px;
   font-size: 0.9rem;
   font-weight: 600;
   border: none;
-  background: linear-gradient(135deg, var(--accent), var(--clay-warm));
+  background: var(--accent);
   color: white;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-md);
 }
 
@@ -56,7 +56,7 @@
 }
 
 .secondary:hover:not(:disabled) {
-  background: rgba(200, 150, 58, 0.15);
+  background: var(--bg-hover);
   transform: translateY(-2px);
 }
 
@@ -80,21 +80,20 @@
   padding: 2rem 1.5rem;
   color: var(--text-secondary);
   text-align: center;
-  border-radius: 25% 15% 20% 30%;
-  background: linear-gradient(135deg, rgba(200, 150, 58, 0.05), rgba(93, 184, 184, 0.05));
-  border: 1px dashed rgba(200, 150, 58, 0.2);
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-color);
 }
 
 .formCard {
-  border: 1px solid rgba(200, 150, 58, 0.15);
-  border-radius: 25% 15% 20% 30%;
+  border: 1px solid var(--bg-hover);
+  border-radius: 4px;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.05));
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
 }
 
 .formGrid {
@@ -129,18 +128,18 @@
 .field textarea {
   padding: 0.85rem;
   border: none;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 4px;
   font-size: 0.95rem;
   font-family: inherit;
   color: var(--text-primary);
-  background: rgba(200, 150, 58, 0.08);
+  background: var(--bg-hover);
   transition: all 0.2s ease;
 }
 
 .field input:focus,
 .field textarea:focus {
   outline: none;
-  background: rgba(200, 150, 58, 0.12);
+  background: var(--bg-hover);
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 
@@ -149,7 +148,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(200, 150, 58, 0.1);
+  border-top: 1px solid var(--bg-hover);
 }
 
 .list {
@@ -162,20 +161,19 @@
 }
 
 .dayCard {
-  border: 1px solid rgba(200, 150, 58, 0.15);
-  border-radius: 22% 18% 25% 20%;
+  border: 1px solid var(--bg-hover);
+  border-radius: 4px;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(200, 150, 58, 0.05), rgba(93, 184, 184, 0.05));
+  background: var(--bg-secondary);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(5px);
   position: relative;
 }
 
 .dayCard:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: rgba(200, 150, 58, 0.25);
+  border-color: var(--border-color);
 }
 
 .dayHeader {
@@ -221,8 +219,8 @@
 .notes {
   margin: 0.75rem 0 0;
   padding: 0.75rem;
-  background: rgba(93, 184, 184, 0.1);
-  border-left: 3px solid var(--clay-water);
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent);
   border-radius: 8px;
   color: var(--text-secondary);
   font-style: italic;
@@ -248,7 +246,7 @@
 }
 
 .linkBtn:hover {
-  color: var(--clay-warm);
+  color: var(--accent);
   transform: translateX(2px);
 }
 

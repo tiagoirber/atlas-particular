@@ -1,4 +1,4 @@
-.wizard {
+﻿.wizard {
   width: 100%;
   max-width: 700px;
   margin: 0 auto;
@@ -18,9 +18,9 @@
 
 .progressBar {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--clay-water));
+  background: var(--accent);
   border-radius: 2px;
-  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Step Indicators */
@@ -75,9 +75,9 @@
 }
 
 .stepIndicator.stepActive .stepNumber {
-  background: linear-gradient(135deg, var(--accent), var(--clay-water));
+  background: var(--accent);
   color: white;
-  box-shadow: 0 4px 12px rgba(200, 150, 58, 0.3);
+  box-shadow: 0 4px 12px var(--border-color);
 }
 
 .stepIndicator.stepActive .stepLabel {
@@ -86,7 +86,7 @@
 }
 
 .stepIndicator.stepCompleted .stepNumber {
-  background: var(--clay-water);
+  background: var(--accent);
   color: white;
 }
 
@@ -150,7 +150,7 @@
 }
 
 .step h2 {
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -183,8 +183,8 @@
 .field select {
   padding: 0.875rem;
   border: none;
-  border-radius: 18% 22% 20% 25%;
-  background: rgba(200, 150, 58, 0.08);
+  border-radius: 4px;
+  background: var(--bg-hover);
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.95rem;
@@ -196,7 +196,7 @@
 .field select:focus {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--accent);
-  background: rgba(200, 150, 58, 0.12);
+  background: var(--bg-hover);
 }
 
 .field input[type="date"] {
@@ -336,8 +336,8 @@
   width: 100%;
   min-height: 200px;
   border: 2px dashed var(--accent);
-  border-radius: 25% 15% 20% 30%;
-  background: linear-gradient(135deg, rgba(200, 150, 58, 0.05), rgba(93, 184, 184, 0.05));
+  border-radius: 4px;
+  background: var(--bg-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 2rem;
@@ -345,8 +345,8 @@
 }
 
 .coverDrop:hover {
-  border-color: var(--clay-water);
-  background: linear-gradient(135deg, rgba(200, 150, 58, 0.1), rgba(93, 184, 184, 0.1));
+  border-color: var(--accent);
+  background: var(--bg-secondary);
   transform: translateY(-2px);
 }
 
@@ -371,7 +371,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 25% 15% 20% 30%;
+  border-radius: 4px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
@@ -409,7 +409,7 @@
 
 .radio:hover,
 .checkbox:hover {
-  background: rgba(200, 150, 58, 0.05);
+  background: var(--bg-hover);
 }
 
 .radio input,
@@ -437,13 +437,13 @@
 /* Review Card */
 .reviewCard {
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(200, 150, 58, 0.08), rgba(93, 184, 184, 0.08));
-  border-radius: 25% 15% 20% 30%;
-  border: 1px solid rgba(200, 150, 58, 0.2);
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
 }
 
 .reviewCard h3 {
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
@@ -457,7 +457,7 @@
 
 .reviewImage {
   margin: 1rem 0;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 4px;
   overflow: hidden;
   aspect-ratio: 3 / 2;
 }
@@ -490,7 +490,7 @@
   flex: 1;
   padding: 1rem;
   border: none;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -504,27 +504,27 @@
 }
 
 .prevBtn:hover:not(:disabled) {
-  background: rgba(200, 150, 58, 0.15);
+  background: var(--bg-hover);
   transform: translateY(-2px);
 }
 
 .nextBtn {
-  background: linear-gradient(135deg, var(--accent), var(--clay-water));
+  background: var(--accent);
   color: white;
 }
 
 .nextBtn:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(200, 150, 58, 0.3);
+  box-shadow: 0 8px 24px var(--border-color);
   transform: translateY(-2px);
 }
 
 .submitBtn {
-  background: linear-gradient(135deg, var(--clay-water), var(--accent));
+  background: var(--accent);
   color: white;
 }
 
 .submitBtn:hover:not(:disabled) {
-  box-shadow: 0 8px 24px rgba(93, 184, 184, 0.3);
+  box-shadow: 0 8px 24px var(--bg-secondary);
   transform: translateY(-2px);
 }
 
