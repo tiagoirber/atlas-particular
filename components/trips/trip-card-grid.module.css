@@ -1,4 +1,4 @@
-.error {
+﻿.error {
   padding: 0.75rem 1rem;
   background: rgba(211, 47, 47, 0.08);
   color: #c62828;
@@ -20,10 +20,10 @@
   display: flex;
   flex-direction: column;
   border: none;
-  border-radius: 25% 15% 22% 28%;
+  border-radius: 4px;
   background: var(--bg-primary);
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-md);
 }
 
@@ -56,7 +56,7 @@
 .coverPlaceholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--clay-soft), rgba(93, 184, 184, 0.1));
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,10 +69,9 @@
   padding: 0.35rem 0.85rem;
   font-size: 0.75rem;
   font-weight: 600;
-  border-radius: 15% 20% 18% 22%;
+  border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  backdrop-filter: blur(10px);
 }
 
 .statusPill.draft {
@@ -81,7 +80,7 @@
 }
 
 .statusPill.published {
-  background: rgba(93, 184, 184, 0.9);
+  background: var(--bg-secondary);
   color: white;
 }
 
@@ -138,18 +137,17 @@
   border: none;
   background: var(--clay-soft);
   color: var(--text-primary);
-  border-radius: 15% 20% 18% 22%;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 60px;
-  backdrop-filter: blur(5px);
 }
 
 .actionLink:hover {
-  background: rgba(200, 150, 58, 0.15);
+  background: var(--bg-hover);
   color: var(--accent);
   transform: translateY(-2px);
 }

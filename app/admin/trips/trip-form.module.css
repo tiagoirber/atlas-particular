@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   max-width: 800px;
   margin: 0 auto;
 }
@@ -75,7 +75,7 @@
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -142,7 +142,7 @@
 }
 
 .submitBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent);
   color: white;
   border: none;
 }

@@ -1,9 +1,8 @@
-.navbar {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--clay-warm) 100%);
+﻿.navbar {
+  background: var(--accent);
   color: white;
   padding: 1rem 0;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
 }
 
 .container {
@@ -22,7 +21,7 @@
   text-decoration: none;
   transition: all 0.2s ease;
   letter-spacing: -0.01em;
-  font-family: Georgia, Merriweather, serif;
+  font-family: var(--font-display);
 }
 
 .logo:hover {
@@ -58,7 +57,7 @@
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 0.6rem 1.15rem;
-  border-radius: 18% 22% 20% 25%;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;

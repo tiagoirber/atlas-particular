@@ -1,9 +1,23 @@
 import type { Metadata } from "next";
+import { Libre_Baskerville, Azeret_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+
+const libreBaskerville = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+});
+
+const azeretMono = Azeret_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   title: "Atlas Particular",
@@ -17,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${libreBaskerville.variable} ${azeretMono.variable}`}>
       <body>
         <AuthProvider>
           <ThemeProvider>
