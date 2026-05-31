@@ -5,7 +5,7 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-export const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
+export const MAX_IMAGE_BYTES = 12 * 1024 * 1024; // 12 MB
 
 export interface ImageValidationResult {
   ok: boolean;
