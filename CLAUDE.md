@@ -480,38 +480,34 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-05-17)
+### Current State (as of 2026-05-31)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
 - Trip CRUD with 6-step wizard
 - Day/attraction CRUD within wizard
-- Photo upload to Cloud Storage
+- Photo upload to Cloud Storage (limite: 12 MB por foto)
 - Admin dashboard with search + filters
 - Public trip viewing
-- Modern Emerald color palette (light + dark modes)
+- Identidade visual "Arquivo Pessoal" — areia envelhecida, vermelho queimado, Libre Baskerville + Azeret Mono (light + dark modes)
 - Responsive design (mobile-first CSS)
 - Toast notifications + confirmation dialogs
-- Deployed to Vercel (auto-redeploy on main push)
+- Deployed to Vercel — https://atlas-particular.vercel.app/
 - Delete de viagens implementado
 - Upload de galeria durante criação de atração (auto-save antes do upload)
 - **Upload de vídeos por atração** (múltiplos, MP4/WebM/MOV, até 500 MB, progresso em tempo real)
+- **Firebase API Key rotacionada** (chave antiga revogada e excluída do Google Cloud)
+- **Foto de capa da atração exibe inteira** (sem corte — igual à capa de viagem)
 
 ⚠️ **Known Issues**:
 - `/app/test/` é uma página temporária — deve ser deletada
 - No dark mode toggle UI (system preference only)
 - No pagination on large trip lists (could be slow 100+ trips)
 
-🔄 **In Progress / Planned**:
-- Rotação da Firebase API Key (ver seção abaixo — PENDENTE)
-- **[PENDENTE] Rodar `npm run typecheck` e `npm run lint`** após feature de vídeos (Node.js não estava disponível na sessão anterior)
-
 ### Immediate Next Steps
 
-1. **[URGENTE] Concluir rotação da Firebase API Key** — ver seção 13 abaixo
-2. **Rodar `npm run typecheck && npm run lint`** para validar a feature de vídeos antes de commitar
-3. **Delete `/app/test/`** (página temporária de testes)
-3. **Test the golden paths** on production Vercel URL
+1. **Delete `/app/test/`** (página temporária de testes)
+2. **Test the golden paths** on production Vercel URL
 
 ### Future Considerations
 
@@ -523,51 +519,21 @@ Mark these moments in your work:
 
 ---
 
-## 13. Segurança — Rotação da Firebase API Key (PENDENTE)
+## 13. Segurança — Rotação da Firebase API Key (✅ CONCLUÍDA em 2026-05-21)
 
-### Contexto (2026-05-17)
+### Contexto
 
 O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta no arquivo `add_env.sh`, que foi commitado por engano.
 
-**O que já foi feito:**
-- `add_env.sh` removido do repositório (commit `c6e9bd0`)
-- `add_env.sh` adicionado ao `.gitignore`
-- Histórico antigo contém a chave, mas o repo é privado — risco baixo
+**O que foi feito:**
+- `add_env.sh` removido do repositório (commit `c6e9bd0`) e adicionado ao `.gitignore`
+- Nova chave gerada no Google Cloud Console em 2026-05-21
+- Chave antiga (`AIzaSyALm1hc4e61BPKo2jRtAEt1e8VwDsr0XS4`) **excluída do Google Cloud**
+- `.env.local` atualizado com a nova chave
+- Variável `NEXT_PUBLIC_FIREBASE_API_KEY` atualizada na Vercel + redeploy confirmado
+- App verificado em produção — login funcionando com a nova chave
 
-**Chave exposta (já comprometida, rotacionar):**
-- `AIzaSyALm1hc4e61BPKo2jRtAEt1e8VwDsr0XS4`
-- É a "Browser key (auto created by Firebase)" no Google Cloud Console
-
-**Nota importante:** A API Key do Firebase para web é pública por design — fica no bundle JS do cliente. A segurança real vem das Firestore Security Rules. Mas é boa prática rotacionar após exposição.
-
-### Passos para concluir a rotação
-
-**Passo 1 — Gerar nova chave no Google Cloud Console:**
-1. Acesse: `console.cloud.google.com/apis/credentials?project=atlas-particular`
-2. Na linha "Browser key (auto created by Firebase)", clique no ícone de **lápis (Editar)**
-3. No topo da página de edição, clique em **"Alternar chave"**
-4. Confirme — uma nova chave será gerada
-5. Copie o novo valor da chave
-
-**Passo 2 — Atualizar o `.env.local` localmente:**
-```bash
-# No arquivo .env.local, atualizar:
-NEXT_PUBLIC_FIREBASE_API_KEY=<nova-chave-aqui>
-```
-
-**Passo 3 — Atualizar a variável na Vercel:**
-1. Acesse o painel da Vercel → projeto atlas-particular → Settings → Environment Variables
-2. Encontre `NEXT_PUBLIC_FIREBASE_API_KEY`
-3. Atualize o valor para a nova chave
-4. Salve e faça um redeploy (ou push para main)
-
-**Passo 4 — Verificar que o app funciona:**
-- Testar login, dashboard, criação de viagem, upload de foto
-- Confirmar que o Vercel fez build sem erros
-
-**Passo 5 — Dismissar o alerta no GitHub:**
-- Acesse: `github.com/tiagoirber/atlas-particular` → aba **Security** → **Secret scanning**
-- Clique no alerta → **Dismiss** → motivo: "Revoked" (já que a chave foi rotacionada)
+**Tudo concluído.** Alerta no GitHub dismissado com motivo "Revoked" em 2026-05-21.
 
 ---
 
@@ -581,6 +547,6 @@ NEXT_PUBLIC_FIREBASE_API_KEY=<nova-chave-aqui>
 
 ---
 
-**Last updated**: 2026-05-17 (vídeos por atração)  
+**Last updated**: 2026-05-31 (foto capa atração + limite foto 12 MB + deploy via API)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
