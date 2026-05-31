@@ -325,8 +325,10 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
 
   async function removeVideo(video: Video) {
     if (!editingId) return;
-    const remaining = (draft.videos || []).filter(
-      (v) => v.storagePath !== video.storagePath,
+    const remaining = (draft.videos || []).filter((v) =>
+      video.youtubeId
+        ? v.youtubeId !== video.youtubeId
+        : v.storagePath !== video.storagePath,
     );
     await setAttractionVideos(tripId, editingId, remaining);
     setDraft((d) => ({ ...d, videos: remaining }));
@@ -336,11 +338,50 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
 
   async function changeVideoCaption(video: Video, caption: string) {
     if (!editingId) return;
-    const updated = (draft.videos || []).map((v) =>
-      v.storagePath === video.storagePath ? { ...v, caption } : v,
-    );
+    const updated = (draft.videos || []).map((v) => {
+      const match = video.youtubeId
+        ? v.youtubeId === video.youtubeId
+        : v.storagePath === video.storagePath;
+      return match ? { ...v, caption } : v;
+    });
     await setAttractionVideos(tripId, editingId, updated);
     setDraft((d) => ({ ...d, videos: updated }));
+  }
+
+  async function handleAddYoutubeVideo(youtubeId: string) {
+    setSaving(true);
+    setActionError("");
+    try {
+      let currentId = editingId;
+      if (!currentId) {
+        if (!draft.title.trim()) {
+          setActionError("Informe o nome da atração antes de adicionar vídeo.");
+          setSaving(false);
+          return;
+        }
+        currentId = await createAttraction(tripId, draft);
+        setEditingId(currentId);
+      }
+      const base = draft.videos?.length || 0;
+      const newVideo: Video = {
+        url: "",
+        storagePath: "",
+        youtubeId,
+        caption: "",
+        order: base,
+        uploadedAt: new Date().toISOString(),
+      };
+      const updated: Video[] = [...(draft.videos || []), newVideo];
+      await setAttractionVideos(tripId, currentId, updated);
+      setDraft((d) => ({ ...d, videos: updated }));
+      await refresh();
+      setActionSuccess("✅ Vídeo do YouTube adicionado!");
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Erro ao adicionar vídeo";
+      setActionError(`❌ ${errorMsg}`);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function updateDraft<K extends keyof AttractionFormData>(
@@ -399,6 +440,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
           onRemovePhoto={removePhoto}
           onCaptionChange={changeCaption}
           onUploadVideo={handleUploadVideo}
+          onAddYoutubeVideo={handleAddYoutubeVideo}
           onRemoveVideo={removeVideo}
           onVideoCaptionChange={changeVideoCaption}
         />
@@ -480,6 +522,7 @@ interface FormProps {
   onRemovePhoto: (photo: Photo) => void;
   onCaptionChange: (photo: Photo, caption: string) => void;
   onUploadVideo: (file: File, onProgress: (pct: number) => void) => Promise<void>;
+  onAddYoutubeVideo: (youtubeId: string) => Promise<void>;
   onRemoveVideo: (video: Video) => void;
   onVideoCaptionChange: (video: Video, caption: string) => void;
 }
@@ -498,6 +541,7 @@ function AttractionForm({
   onRemovePhoto,
   onCaptionChange,
   onUploadVideo,
+  onAddYoutubeVideo,
   onRemoveVideo,
   onVideoCaptionChange,
 }: FormProps) {
@@ -814,6 +858,7 @@ function AttractionForm({
           label="Adicionar vídeo"
           disabled={saving}
           onSelect={onUploadVideo}
+          onAddYoutube={onAddYoutubeVideo}
         />
         <VideoGallery
           videos={draft.videos || []}

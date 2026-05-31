@@ -18,7 +18,7 @@ export function VideoGallery({ videos, editable, onRemove, onCaptionChange }: Pr
     <ul className={styles.list}>
       {videos.map((video) => (
         <VideoItem
-          key={video.storagePath}
+          key={video.youtubeId || video.storagePath}
           video={video}
           editable={editable}
           onRemove={onRemove}
@@ -47,12 +47,25 @@ function VideoItem({ video, editable, onRemove, onCaptionChange }: ItemProps) {
 
   return (
     <li className={styles.item}>
-      <video
-        src={video.url}
-        controls
-        className={styles.player}
-        preload="metadata"
-      />
+      {video.youtubeId ? (
+        <div className={styles.iframeWrapper}>
+          <iframe
+            src={`https://www.youtube.com/embed/${video.youtubeId}`}
+            className={styles.iframe}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={video.caption || "Vídeo do YouTube"}
+          />
+        </div>
+      ) : (
+        <video
+          src={video.url}
+          controls
+          className={styles.player}
+          preload="metadata"
+        />
+      )}
+
       {editable ? (
         <div className={styles.editRow}>
           <input
