@@ -1,0 +1,109 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.drop {
+  border: 1.5px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 1.4rem;
+  text-align: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.drop:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.drop input {
+  display: none;
+}
+
+.drop small {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.busy {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.youtubeRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.youtubeInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.youtubeInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.youtubeInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.youtubeBtn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.youtubeBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.youtubeBtn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+.error {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  background: rgba(211, 47, 47, 0.08);
+  color: #c62828;
+  border: 1px solid rgba(211, 47, 47, 0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
