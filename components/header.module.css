@@ -64,6 +64,26 @@
   align-items: center;
 }
 
+.themeToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.themeToggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
 .loginBtn,
 .logoutBtn {
   padding: 0.55rem 1.25rem;

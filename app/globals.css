@@ -37,40 +37,52 @@
   --font-data:    var(--font-mono),  'Azeret Mono', 'Courier New', monospace;
 }
 
-[data-theme="dark"],
+/* Preferência do sistema — só aplica se o usuário não escolheu explicitamente light */
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* Backgrounds */
+  :root:not([data-theme="light"]) {
     --bg-primary:   oklch(13% 0.010 30);
     --bg-secondary: oklch(17% 0.010 30);
     --bg-header:    oklch(15% 0.010 30);
     --bg-hover:     oklch(20% 0.010 30);
-
-    /* Text */
     --text-primary:   oklch(90% 0.008 70);
     --text-secondary: oklch(68% 0.010 70);
     --text-tertiary:  oklch(52% 0.010 70);
-
-    /* Borders */
     --border-color: oklch(28% 0.012 30);
     --border-light: oklch(22% 0.010 30);
-
-    /* Shadows */
     --shadow-sm:    0 1px 3px  rgba(0, 0, 0, 0.30);
     --shadow-md:    0 4px 12px rgba(0, 0, 0, 0.40);
     --shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.50);
     --shadow-color: rgba(0, 0, 0, 0.40);
-
-    /* Accent — vermelho mais claro no escuro */
     --accent:       oklch(60% 0.120 25);
     --accent-light: oklch(70% 0.100 25);
-
-    /* Legacy clay vars */
     --clay-warm:  oklch(17% 0.010 30);
     --clay-water: oklch(20% 0.010 30);
     --clay-earth: oklch(60% 0.120 25);
     --clay-soft:  oklch(16% 0.010 30);
   }
+}
+
+/* Toggle manual de tema escuro */
+[data-theme="dark"] {
+  --bg-primary:   oklch(13% 0.010 30);
+  --bg-secondary: oklch(17% 0.010 30);
+  --bg-header:    oklch(15% 0.010 30);
+  --bg-hover:     oklch(20% 0.010 30);
+  --text-primary:   oklch(90% 0.008 70);
+  --text-secondary: oklch(68% 0.010 70);
+  --text-tertiary:  oklch(52% 0.010 70);
+  --border-color: oklch(28% 0.012 30);
+  --border-light: oklch(22% 0.010 30);
+  --shadow-sm:    0 1px 3px  rgba(0, 0, 0, 0.30);
+  --shadow-md:    0 4px 12px rgba(0, 0, 0, 0.40);
+  --shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.50);
+  --shadow-color: rgba(0, 0, 0, 0.40);
+  --accent:       oklch(60% 0.120 25);
+  --accent-light: oklch(70% 0.100 25);
+  --clay-warm:  oklch(17% 0.010 30);
+  --clay-water: oklch(20% 0.010 30);
+  --clay-earth: oklch(60% 0.120 25);
+  --clay-soft:  oklch(16% 0.010 30);
 }
 
 html {
