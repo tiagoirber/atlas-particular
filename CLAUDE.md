@@ -496,6 +496,7 @@ Mark these moments in your work:
 - Delete de viagens implementado
 - Upload de galeria durante criação de atração (auto-save antes do upload)
 - **Upload de vídeos por atração** (múltiplos, MP4/WebM/MOV, até 500 MB, progresso em tempo real)
+- **Link do YouTube como vídeo** (alternativa ao upload direto — embed iframe 16:9, sem custo de storage)
 - **Firebase API Key rotacionada** (chave antiga revogada e excluída do Google Cloud)
 - **Foto de capa da atração exibe inteira** (sem corte — igual à capa de viagem)
 
@@ -547,6 +548,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-05-31 (foto capa atração + limite foto 12 MB + deploy via API)  
+**Last updated**: 2026-05-31 (YouTube link em vídeos de atração)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
