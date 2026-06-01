@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${libreBaskerville.variable} ${azeretMono.variable}`}>
+    <html lang="pt-BR" className={`${libreBaskerville.variable} ${azeretMono.variable}`} suppressHydrationWarning>
       <body>
         <AuthProvider>
           <ThemeProvider>
