@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sem conexão — Atlas Particular</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, serif;
+      background: #f5f0e8;
+      color: #2a1e1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 24px;
+      text-align: center;
+    }
+    .icon { font-size: 56px; margin-bottom: 20px; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    p  { font-size: 15px; color: #6b5248; margin-bottom: 28px; line-height: 1.6; }
+    button {
+      padding: 12px 28px;
+      font-size: 15px;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid #662418;
+      background: transparent;
+      color: #662418;
+      letter-spacing: 0.04em;
+    }
+    button:active { background: #662418; color: #f5f0e8; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1816; color: #e8e0d8; }
+      p { color: #9a8880; }
+      button { border-color: #c0624e; color: #c0624e; }
+      button:active { background: #c0624e; color: #1a1816; }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="icon">📵</div>
+    <h1>Sem conexão</h1>
+    <p>Verifique sua internet e tente novamente.</p>
+    <button onclick="location.reload()">Tentar novamente</button>
+  </div>
+</body>
+</html>
