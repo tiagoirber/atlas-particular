@@ -123,7 +123,15 @@ Atlas Particular/
 │   ├── validation.ts             # Input validation
 │   └── (other helpers)
 │
-├── public/                       # Static assets (images, fonts)
+├── public/                       # Static assets
+│   ├── manifest.json             # PWA manifest
+│   ├── sw.js                     # Service worker (cache-first _next/static, network-first nav)
+│   ├── offline.html              # Página exibida sem conexão
+│   └── icons/                    # Ícones PWA (180, 192, 512, maskable-512)
+│
+├── components/
+│   ├── pwa-register.tsx          # Registra SW + auto-reload em nova versão
+│   └── header.tsx                # Header com dark mode toggle (usa ThemeProvider)
 │
 ├── CLAUDE.md                     # This file
 ├── package.json                  # Dependencies & scripts
@@ -357,8 +365,22 @@ Do **NOT** refactor, rename, or change these without explicit justification:
    - **Why**: Avoids specificity conflicts, easier to debug
 
 8. **Don't delete pages without updating navigation**
-   - `/preview-colors/` is temporary; remove it + check for links to it
+   - Always search for imports/links before deleting a page
    - **Why**: Broken links break trust in production
+
+11. **Don't misturar seletor e at-rule em lista de seletores CSS**
+    ```css
+    /* ❌ INVÁLIDO — browser ignora [data-theme="dark"] inteiro */
+    [data-theme="dark"],
+    @media (prefers-color-scheme: dark) { :root { ... } }
+    
+    /* ✅ CORRETO — duas regras separadas */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { ... }
+    }
+    [data-theme="dark"] { ... }
+    ```
+    - **Why**: CSS não permite at-rules (`@media`) em listas de seletores; o bloco inteiro é descartado
 
 9. **Don't expose Firebase secrets in client code**
    - Config is in `.env.local` (gitignored), loaded at build time
@@ -480,7 +502,7 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-05-31)
+### Current State (as of 2026-06-01)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
@@ -499,21 +521,22 @@ Mark these moments in your work:
 - **Link do YouTube como vídeo** (alternativa ao upload direto — embed iframe 16:9, sem custo de storage)
 - **Firebase API Key rotacionada** (chave antiga revogada e excluída do Google Cloud)
 - **Foto de capa da atração exibe inteira** (sem corte — igual à capa de viagem)
+- **Dark mode toggle manual no Header** (botão sol/lua, persiste em localStorage, fallback para prefers-color-scheme)
+- **PWA instalável** (manifest, service worker, ícones reais, safe areas iOS/Android, offline fallback)
+- **Ícone real do app** — `public/icons/icon.png` (1254×1254 px, diário de couro com monograma "AP"); gerado para 180/192/512/maskable-512
 
 ⚠️ **Known Issues**:
-- `/app/test/` é uma página temporária — deve ser deletada
-- No dark mode toggle UI (system preference only)
 - No pagination on large trip lists (could be slow 100+ trips)
 
 ### Immediate Next Steps
 
-1. **Delete `/app/test/`** (página temporária de testes)
-2. **Test the golden paths** on production Vercel URL
+1. **Rodar `npm run typecheck && npm run lint`** — typecheck não foi possível nesta sessão (Node.js fora do PATH)
+2. **Deploy via `/deploy`** — PWA ainda não está em produção
+3. **Verificar PWA no mobile** após deploy: Chrome DevTools → Application → Manifest; instalar no iOS/Android
 
 ### Future Considerations
 
 - **Pagination**: If trip count grows, add pagination to dashboard
-- **Dark mode toggle**: Add UI button to switch themes
 - **Analytics**: Track user behavior (trips published, days edited, etc.)
 - **Sharing**: Generate shareable links with expiry
 - **Comments**: Allow public comments on trips (guestbook)
@@ -548,6 +571,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-05-31 (YouTube link em vídeos de atração)  
+**Last updated**: 2026-06-01 (PWA completo + ícone real do app; dark mode toggle; fix CSS selector)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
