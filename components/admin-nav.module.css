@@ -1,33 +1,37 @@
-﻿.navbar {
+.navbar {
   background: var(--accent);
   color: white;
-  padding: 1rem 0;
   box-shadow: var(--shadow-md);
 }
 
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0.875rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  min-height: 0;
 }
 
 .logo {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 700;
   color: white;
   text-decoration: none;
-  transition: all 0.2s ease;
   letter-spacing: -0.01em;
   font-family: var(--font-display);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
 }
 
 .logo:hover {
-  transform: translateY(-1px);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0.85;
 }
+
+/* ─── Desktop menu ─── */
 
 .menu {
   list-style: none;
@@ -36,6 +40,7 @@
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 .menu a {
@@ -43,12 +48,13 @@
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
   padding: 0.5rem 0;
+  white-space: nowrap;
 }
 
 .menu a:hover {
-  opacity: 0.9;
+  opacity: 0.85;
   border-bottom: 2px solid rgba(255, 255, 255, 0.6);
 }
 
@@ -56,36 +62,130 @@
   background: rgba(255, 255, 255, 0.15);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.6rem 1.15rem;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  white-space: nowrap;
+  transition: background 0.2s ease;
 }
 
 .logoutBtn:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 768px) {
-  .menu {
-    gap: 1rem;
-    font-size: 0.85rem;
-  }
+/* ─── Mobile hamburger (oculto no desktop) ─── */
 
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.hamburger:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform-origin: center;
+}
+
+.barTop { transform: translateY(7px) rotate(45deg); }
+.barMid { opacity: 0; transform: scaleX(0); }
+.barBot { transform: translateY(-7px) rotate(-45deg); }
+
+/* ─── Mobile dropdown ─── */
+
+.mobileMenu {
+  display: none;
+  flex-direction: column;
+  background: var(--accent);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.mobileMenuOpen {
+  display: flex;
+}
+
+.mobileLink {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  text-decoration: none;
+  min-height: 44px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.15s;
+}
+
+.mobileLink:last-of-type {
+  border-bottom: none;
+}
+
+.mobileLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobileLogoutBtn {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  min-height: 44px;
+  transition: background 0.15s;
+}
+
+.mobileLogoutBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Breakpoints ─── */
+
+@media (max-width: 640px) {
   .container {
-    padding: 0 1rem;
+    padding: 0.625rem 1rem;
   }
 
   .logo {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
-  .logoutBtn {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.8rem;
+  /* Esconder menu desktop */
+  .menu {
+    display: none;
+  }
+
+  /* Mostrar hamburger */
+  .hamburger {
+    display: flex;
   }
 }
