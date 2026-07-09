@@ -1,83 +1,95 @@
 # Atlas Particular
-> Comprimido em: 2026-05-31 | Sessão: suporte a link do YouTube como alternativa ao upload direto de vídeos por atração
+> Comprimido em: 2026-07-09 | Sessão: limpeza de branches obsoletas + setup completo de automação Claude Code (hooks, skills, subagent, MCP) via PR #16
 
 ## Objetivo do projeto
 App de diário de viagens privado. Usuários registram viagens, documentam dias com fotos/vídeos e publicam uma página pública da viagem.
 
 ## Stack e configurações
 - **Frontend**: Next.js 14.2.13, React 18.3.1, TypeScript 5 (strict)
-- **Styling**: CSS Modules + identidade visual "Arquivo Pessoal" (areia envelhecida `#f5f0e8`, vermelho queimado, Libre Baskerville + Azeret Mono)
+- **Styling**: CSS Modules + identidade visual "Arquivo Pessoal" (areia envelhecida, vermelho queimado, Libre Baskerville + Azeret Mono)
 - **Backend**: Firebase (Auth email/password, Firestore, Cloud Storage)
 - **Deploy**: Vercel — https://atlas-particular.vercel.app/ (auto-deploy no merge em `main`)
 - **Repo**: `tiagoirber/atlas-particular` (main protegida — sempre via PR)
-- **Node.js**: em `C:\Program Files\nodejs` (não está no PATH padrão do PowerShell — adicionar `$env:PATH = "C:\Program Files\nodejs;" + $env:PATH`)
-- **Deploy via API**: usar skill `/deploy`; token via Windows Credential Manager (classe `CMDeploy` C# inline); JSON do PR como string literal — `ConvertTo-Json` causa erro de parsing na API GitHub
+- **Node.js**: em `C:\Program Files\nodejs` — já está no PATH do Git Bash (não precisa do hack de PATH que era necessário no PowerShell puro)
+- **jq NÃO está instalado** neste ambiente — hooks e scripts devem parsear JSON via `node -e`, não `jq`
+- **Deploy via API**: usar skill `/deploy`; token via Windows Credential Manager (classe `CMDeploy` C# inline); `gh` CLI não está instalado, sempre usar a API REST direto
+- **MCP instalados**: `context7` (doc lookup, escopo local desta máquina), `chrome-devtools` (plugin ecc, usado pelo subagent `testador-golden-path`)
 
 ## Estrutura de arquivos relevante
 ```
 types/
-  video.ts          — interface Video { url, storagePath, youtubeId?, caption, order, uploadedAt }
+  video.ts          — Video { url, storagePath, youtubeId?, caption, order, uploadedAt }
   attraction.ts     — AttractionBase: photos: Photo[], videos: Video[]
-  photo.ts          — interface Photo
 
 utils/
   validators.ts     — validateImageFile (max 12 MB), validateVideoFile (max 500 MB)
 
 lib/
   storage-service.ts      — uploadBytesResumable para vídeos com callback de progresso
-  attractions-service.ts  — setAttractionPhotos, setAttractionVideos, deleteAttraction (limpa storage)
+  attractions-service.ts  — setAttractionPhotos, setAttractionVideos, deleteAttraction
 
 components/
+  header.tsx / header.module.css        — hamburger ≤640px, safe-area-inset-top, ThemeProvider (dark mode toggle)
+  admin-nav.tsx / admin-nav.module.css  — hamburger ≤640px, dropdown vermelho
   attractions/attractions-manager.tsx   — CRUD de atrações + handlers de vídeo (upload + YouTube)
-  photos/photo-uploader.tsx             — upload de imagens (aceita JPEG/PNG/WEBP)
-  photos/photo-uploader.module.css
-  photos/photo-gallery.tsx
-  photos/video-uploader.tsx             — upload de arquivo + input de link YouTube
-  photos/video-uploader.module.css      — CSS próprio (não depende do photo-uploader.module.css)
+  photos/video-uploader.tsx             — upload arquivo + input link YouTube
   photos/video-gallery.tsx              — <video> para upload direto, <iframe> para YouTube
-  photos/video-gallery.module.css       — iframeWrapper 16:9 via padding-bottom: 56.25%
+  pwa-register.tsx                      — registra SW + auto-reload em nova versão
+  footer.tsx                            — footer do app
 
 app/
-  trips/[id]/attractions/[attractionId]/page.tsx          — página pública da atração
-  trips/[id]/attractions/[attractionId]/attraction-viewer.module.css — hero flex+auto (sem corte)
-  trips/[id]/trip-viewer.module.css
+  layout.tsx        — Viewport cover, PWA metadata, PwaRegister, ThemeProvider
   globals.css       — CSS vars identidade visual Arquivo Pessoal
-  (public)/viagens/ — página de listagem pública
-  admin/dashboard/  — painel admin
+  (app/test/ foi REMOVIDO — não existe mais)
+
+public/
+  manifest.json / sw.js / offline.html / icons/ — PWA completo
+
+.claude/commands/
+  deploy.md, deploy-template.md, verify.md, inicio.md, fim.md, ui-style-system.md
+  migrar-schema-firestore.md  — checklist de migração segura de schema Firestore (novo)
+  novo-componente.md          — gera par .tsx + .module.css na convenção do projeto (novo)
+
+.claude/agents/
+  testador-golden-path.md — percorre os 8 golden paths via Chrome DevTools MCP (novo)
+
+.claude/settings.json
+  hooks.PostToolUse — typecheck+lint automático em .ts/.tsx (não bloqueia)
+  hooks.PreToolUse  — exige confirmação para editar .env.local ou firestore.rules
 ```
 
 ## Decisões tomadas
-- **Vídeos YouTube**: campo `youtubeId` no tipo `Video`; `url` e `storagePath` ficam vazios; remoção e edição de legenda identificam pelo `youtubeId` quando presente, pelo `storagePath` caso contrário
-- **Embed YouTube**: `https://www.youtube.com/embed/{youtubeId}` em iframe 16:9 (`padding-bottom: 56.25%`)
-- **Extração de ID YouTube**: regex `/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/` — aceita URLs longas, youtu.be, shorts e embed
-- **Foto de capa da atração**: `display: flex + width/height: auto + max-height: 90vh` — NÃO usar `object-fit: cover` (corta a imagem)
-- **Limite de foto**: 12 MB (definido em `utils/validators.ts`)
-- **Deploy**: nunca push direto em main; usar skill `/deploy`; JSON para API GitHub como string literal
+- **Hamburger menu**: breakpoint `≤ 640px`; fecha em Escape + clique fora + seleção de link + mudança de rota
+- **Step indicators mobile**: `overflow-x: auto` + `scrollbar-width: none` em `≤ 480px`; labels ocultos
+- **Vídeos YouTube**: `youtubeId` no tipo `Video`; embed iframe 16:9 via `padding-bottom: 56.25%`
+- **Foto de capa**: `display: flex + width/height: auto + max-height: 90vh` — NÃO usar `object-fit: cover`
+- **Limite de foto**: 12 MB em `utils/validators.ts`
+- **Deploy**: skill `/deploy`; JSON para API GitHub como string literal; sem `gh` CLI disponível
 - **Token GitHub**: Windows Credential Manager via classe C# inline `CMDeploy`
+- **Branches locais squash-mergeadas**: `git branch -d` sempre falha nelas ("not fully merged") mesmo já estando 100% no `main` — antes de `git branch -D`, confirmar com `git diff origin/main..<branch> --stat` que não sobra conteúdo exclusivo
+- **Hooks**: usar `node -e` para parsear stdin JSON (não `jq`, que não existe neste ambiente); hook de typecheck/lint é não-bloqueante (`|| true` / `; true`) para não travar edições em andamento
+- **context7 MCP**: instalado em escopo local (`claude mcp add`), não compartilhado com o outro dev via `.mcp.json`
 
 ## Regras e restrições
 - Nunca push direto em `main`
 - CSS Modules: sem seletores HTML bare, sempre classes
-- Cores sempre via `var(--nome)` — nunca hardcode (exceto `#000` em backgrounds de hero)
+- Cores sempre via `var(--nome)` — nunca hardcode
 - `createdAt` pode ser `string | Date | Timestamp` — usar `toDate()?.getTime() ?? 0`
-- Não usar `.toMillis()` diretamente em timestamps
-- `AttractionFormData`: `photos?` e `videos?` opcionais; `AttractionBase` exige ambos como arrays obrigatórios
-- Documentos Firestore antigos sem campo `videos` → tratar com `att.videos || []`
+- Documentos Firestore antigos sem `videos` → tratar com `att.videos || []`
 - Vídeos YouTube não têm `storagePath` — não tentar deletar do Storage
+- Mudança de schema Firestore → usar skill `/migrar-schema-firestore` (checklist obrigatório)
+- Editar `.env.local` ou `firestore.rules` → hook vai pedir confirmação explícita, é esperado
 
 ## Estado atual
-- ✅ Auth, CRUD de viagens/dias/atrações totalmente funcional
-- ✅ Upload de fotos (12 MB) e vídeos (500 MB) por atração, com progresso
-- ✅ Link do YouTube como alternativa ao upload (iframe 16:9, sem custo Firebase)
-- ✅ Identidade visual Arquivo Pessoal em todo o app
-- ✅ Firebase API Key rotacionada e confirmada em produção
-- ✅ Foto de capa da atração exibe inteira (sem corte)
+- ✅ Auth, CRUD de viagens/dias/atrações, upload de fotos/vídeos, YouTube embed — tudo funcional e em produção
+- ✅ Dark mode toggle, PWA instalável, responsividade mobile — em produção (PRs #12, #14, #15)
+- ✅ `app/test/` removido
+- ✅ Automação Claude Code completa: hooks + 2 skills novas + 1 subagent + MCP context7 — em produção (PR #16)
 - ✅ Typecheck e lint passando sem erros
-- ✅ App em produção: https://atlas-particular.vercel.app/
-- ✅ PRs mergeados: #9 (foto capa), #10 (limite 12 MB), #11 (YouTube)
+- ⚠️ 7 branches locais antigas não verificadas (ver Pendências)
 
-## Pendências
-1. Deletar `/app/test/` (página temporária de testes)
-2. Testar golden paths na URL de produção após os últimos deploys
-3. Dark mode toggle UI (atualmente só por preferência do sistema)
-4. Paginação no dashboard (sem urgência, para quando houver 100+ viagens)
+## Pendências (em ordem de prioridade)
+1. Verificar e limpar branches locais antigas: `chore/skills-de-deploy`, `chore/verify-skill-e-regra-claude`, `design/arquivo-pessoal`, `fix/hero-foto-inteira`, `fix/layout-e-videos`, `fix/photo-upload-filelist`, `fix/storage-rules-videos`
+2. Testar os golden paths na URL de produção (usar subagent `testador-golden-path`)
+3. Decidir se `context7` MCP deve virar compartilhado via `.mcp.json` para o outro dev
+4. Paginação no dashboard (sem urgência, só quando houver 100+ viagens)

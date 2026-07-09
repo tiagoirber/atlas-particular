@@ -66,6 +66,8 @@ npm run typecheck        # Run TypeScript compiler (no emit) — catches type er
 
 **Before committing**: Always run `npm run typecheck` and `npm run lint` locally. Both must pass.
 
+**Automação**: Um hook `PostToolUse` (`.claude/settings.json`) já roda `typecheck` + `lint` automaticamente após qualquer edição em `.ts`/`.tsx` (não bloqueia, só reporta). Hooks neste projeto usam `node -e` para parsear o JSON do stdin — `jq` **não está instalado** neste ambiente Windows/Git Bash.
+
 ---
 
 ## 3. Folder Structure
@@ -133,6 +135,11 @@ Atlas Particular/
 ```
 
 **Golden rule**: Pages go in `app/`, components in `components/`, utilities in `lib/` and `utils/`.
+
+**Automação Claude Code** (`.claude/`):
+- `commands/`: `deploy`, `deploy-template`, `verify`, `inicio`, `fim`, `ui-style-system`, `migrar-schema-firestore`, `novo-componente`
+- `agents/testador-golden-path.md`: percorre os golden paths (seção 4) via Chrome DevTools MCP
+- `settings.json`: hooks de typecheck/lint automático e confirmação obrigatória para editar `.env.local`/`firestore.rules`
 
 ---
 
@@ -213,6 +220,9 @@ Do **NOT** refactor, rename, or change these without explicit justification:
 - **What**: Project ID, API keys, Firestore database URL
 - **Why**: Wrong project = app talks to wrong backend or test data.
 - **Change protocol**: Never change in env files without coordination. Document in PR.
+
+### 5.6 Proteção automática (hook)
+- Um hook `PreToolUse` (`.claude/settings.json`) exige confirmação explícita antes de editar `.env.local` ou `firestore.rules`, mesmo em modo de permissão mais permissivo. Não remova esse hook sem justificativa.
 
 ---
 
@@ -369,6 +379,10 @@ Do **NOT** refactor, rename, or change these without explicit justification:
     - Merge directly to main only in true emergencies (documented in Slack)
     - **Why**: Catch bugs early; distribute knowledge
 
+11. **Don't leave `/fim`'s CLAUDE.md update uncommitted**
+    - Se as mudanças do Passo 2 do `/fim` não forem commitadas (ex.: descartadas numa sessão seguinte por parecerem "sobra"), a próxima sessão parte de informação desatualizada — foi o que aconteceu com dark mode/PWA/responsividade, que ficaram implementados no código mas nunca documentados aqui até esta sessão
+    - **Why**: O `/fim` atual já força commit + push só dos arquivos de continuidade (Passo 4) exatamente para evitar isso
+
 ---
 
 ## 9. Disciplina de Contexto
@@ -480,7 +494,7 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-05-31)
+### Current State (as of 2026-07-09)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
@@ -499,24 +513,28 @@ Mark these moments in your work:
 - **Link do YouTube como vídeo** (alternativa ao upload direto — embed iframe 16:9, sem custo de storage)
 - **Firebase API Key rotacionada** (chave antiga revogada e excluída do Google Cloud)
 - **Foto de capa da atração exibe inteira** (sem corte — igual à capa de viagem)
+- **`/app/test/` removido** (PR #12)
+- **Dark mode toggle manual** no Header (sol/lua, localStorage) (PR #12)
+- **PWA instalável** (manifest, service worker, ícones reais, offline fallback) (PR #14)
+- **Responsividade mobile corrigida** — hamburger menu no header/admin-nav, step indicators com scroll horizontal (PR #15)
+- **Automação Claude Code** (PR #16): hooks de typecheck/lint + proteção de arquivo sensível, skills `/migrar-schema-firestore` e `/novo-componente`, subagent `testador-golden-path`, MCP `context7` (instalado só localmente nesta máquina — não compartilhado via `.mcp.json`)
 
 ⚠️ **Known Issues**:
-- `/app/test/` é uma página temporária — deve ser deletada
-- No dark mode toggle UI (system preference only)
 - No pagination on large trip lists (could be slow 100+ trips)
+- Branches locais antigas (`chore/skills-de-deploy`, `chore/verify-skill-e-regra-claude`, `design/arquivo-pessoal`, `fix/hero-foto-inteira`, `fix/layout-e-videos`, `fix/photo-upload-filelist`, `fix/storage-rules-videos`) ainda não verificadas quanto a estarem mescladas — não deletar sem antes conferir `git diff origin/main..<branch> --stat`
 
 ### Immediate Next Steps
 
-1. **Delete `/app/test/`** (página temporária de testes)
-2. **Test the golden paths** on production Vercel URL
+1. Verificar e limpar as branches locais antigas listadas acima
+2. **Test the golden paths** on production Vercel URL (usar o subagent `testador-golden-path` ou testar manualmente)
 
 ### Future Considerations
 
 - **Pagination**: If trip count grows, add pagination to dashboard
-- **Dark mode toggle**: Add UI button to switch themes
 - **Analytics**: Track user behavior (trips published, days edited, etc.)
 - **Sharing**: Generate shareable links with expiry
 - **Comments**: Allow public comments on trips (guestbook)
+- **context7 MCP compartilhado com o time**: hoje é config local; se quiser compartilhar, adicionar via `.mcp.json` no repo
 
 ---
 
@@ -548,6 +566,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-05-31 (YouTube link em vídeos de atração)  
+**Last updated**: 2026-07-09 (automação Claude Code: hooks, skills, subagent, context7; correção de estado atual desatualizado)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
