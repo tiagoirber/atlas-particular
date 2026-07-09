@@ -3,5 +3,33 @@
     "allow": [
       "Bash(npm --version)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).tool_input.file_path||'')}catch(e){console.log('')}})\"); case \"$f\" in *.ts|*.tsx) { npm run typecheck; npm run lint; } 2>&1 | tail -40 ;; esac; true",
+            "timeout": 90,
+            "statusMessage": "Rodando typecheck e lint..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(node -e \"process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).tool_input.file_path||'')}catch(e){console.log('')}})\"); case \"$f\" in *.env.local|*firestore.rules) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"Arquivo sensivel (segredo Firebase ou regra de seguranca) - confirme antes de editar.\"}}' ;; esac",
+            "timeout": 10,
+            "statusMessage": "Verificando arquivo sensivel..."
+          }
+        ]
+      }
+    ]
   }
 }
