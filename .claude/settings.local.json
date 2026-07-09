@@ -63,7 +63,10 @@
       "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); Set-Location \"c:\\\\Users\\\\irber\\\\OneDrive\\\\1\\) APPs\\\\Claude Code\\\\Atlas Particular\"; npm run typecheck 2>&1)",
       "PowerShell(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source)",
       "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object Name -First 5)",
-      "PowerShell($gitPath = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath\\) { & $gitPath --version } else { \"Git não encontrado em Program Files\" }; $gitPath2 = \"C:\\\\Users\\\\irber\\\\AppData\\\\Local\\\\Programs\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath2\\) { & $gitPath2 --version } else { \"Git não encontrado em AppData\" })"
+      "PowerShell($gitPath = \"C:\\\\Program Files\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath\\) { & $gitPath --version } else { \"Git não encontrado em Program Files\" }; $gitPath2 = \"C:\\\\Users\\\\irber\\\\AppData\\\\Local\\\\Programs\\\\Git\\\\bin\\\\git.exe\"; if \\(Test-Path $gitPath2\\) { & $gitPath2 --version } else { \"Git não encontrado em AppData\" })",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(npm --version)"
     ],
     "additionalDirectories": [
       "C:\\Users\\User\\OneDrive\\Claude Code\\Cartografia �ntima",
