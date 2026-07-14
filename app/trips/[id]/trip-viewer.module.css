@@ -15,27 +15,30 @@
 .hero {
   position: relative;
   width: 100%;
-  max-height: 90vh;
+  height: 60vh;
+  min-height: 380px;
+  max-height: 640px;
   overflow: hidden;
-  background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: var(--bg-secondary);
+}
+
+.heroActions {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 2;
 }
 
 .heroImg {
   display: block;
-  max-width: 100%;
-  max-height: 90vh;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .heroPlaceholder {
-  min-height: 380px;
-  height: 60vh;
-  max-height: 640px;
   width: 100%;
+  height: 100%;
   background: var(--bg-secondary);
 }
 
@@ -218,6 +221,7 @@
 .search,
 .select {
   padding: 0.75rem 0.9rem;
+  min-height: 44px;
   border-radius: 10px;
   border: none;
   background: var(--clay-soft);
@@ -225,6 +229,18 @@
   font-size: 0.93rem;
   font-family: inherit;
   transition: all 0.2s ease;
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search,
+  .select {
+    width: 100%;
+  }
 }
 
 .search:focus,
@@ -422,4 +438,39 @@
 
 .adminLink:hover {
   background: var(--bg-hover);
+}
+
+.skeletonHero {
+  width: 100%;
+  height: 60vh;
+  min-height: 380px;
+  max-height: 640px;
+  background: var(--bg-secondary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeletonSection {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonLine {
+  height: 1rem;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeletonLine.wide {
+  width: 70%;
+  height: 1.75rem;
+}
+
+.skeletonLine.short {
+  width: 40%;
 }

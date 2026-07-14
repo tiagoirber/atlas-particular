@@ -20,6 +20,9 @@ import {
   daysBetween,
 } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
+import { ShareButton } from "@/components/trips/share-button";
+import { DayNav, type DayNavItem } from "@/components/trips/day-nav";
+import { useToast, ToastsContainer } from "@/components/toast";
 import styles from "./trip-viewer.module.css";
 
 interface Props {
@@ -29,6 +32,7 @@ interface Props {
 export default function TripViewerPage({ params }: Props) {
   const tripId = params.id;
   const { user, isAdmin } = useAuth();
+  const { toasts, addToast, removeToast } = useToast();
 
   const [trip, setTrip] = useState<TripDoc | null>(null);
   const [days, setDays] = useState<DayDoc[]>([]);
@@ -37,7 +41,6 @@ export default function TripViewerPage({ params }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [dayFilter, setDayFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<AttractionType | "">("");
 
   useEffect(() => {
@@ -63,7 +66,6 @@ export default function TripViewerPage({ params }: Props) {
   const visible = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return attractions.filter((a) => {
-      if (dayFilter && a.dayId !== dayFilter) return false;
       if (typeFilter && a.type !== typeFilter) return false;
       if (!term) return true;
       return (
@@ -73,7 +75,7 @@ export default function TripViewerPage({ params }: Props) {
         a.notes?.toLowerCase().includes(term)
       );
     });
-  }, [attractions, searchTerm, dayFilter, typeFilter]);
+  }, [attractions, searchTerm, typeFilter]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, AttractionDoc[]>();
@@ -90,7 +92,7 @@ export default function TripViewerPage({ params }: Props) {
     return (
       <>
         <PublicHeader />
-        <main className={styles.main}>Carregando…</main>
+        <TripViewerSkeleton />
       </>
     );
   }
@@ -123,6 +125,10 @@ export default function TripViewerPage({ params }: Props) {
 
   const length = daysBetween(trip.startDate, trip.endDate);
   const usedTypes = Array.from(new Set(attractions.map((a) => a.type))) as AT[];
+  const dayNavItems: DayNavItem[] = days.map((d) => ({
+    id: d.id,
+    label: `Dia ${d.order + 1}`,
+  }));
 
   return (
     <>
@@ -135,6 +141,12 @@ export default function TripViewerPage({ params }: Props) {
           ) : (
             <div className={styles.heroPlaceholder} />
           )}
+          <div className={styles.heroActions}>
+            <ShareButton
+              title={trip.title}
+              onCopied={() => addToast("Link copiado!", "success")}
+            />
+          </div>
           <div className={styles.heroOverlay}>
             <div className={styles.heroInner}>
               <p className={styles.eyebrow}>
@@ -232,18 +244,6 @@ export default function TripViewerPage({ params }: Props) {
               className={styles.search}
             />
             <select
-              value={dayFilter}
-              onChange={(e) => setDayFilter(e.target.value)}
-              className={styles.select}
-            >
-              <option value="">Todos os dias</option>
-              {days.map((d) => (
-                <option key={d.id} value={d.id}>
-                  Dia {d.order + 1} · {d.title || formatLongDate(d.date)}
-                </option>
-              ))}
-            </select>
-            <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as AttractionType | "")}
               className={styles.select}
@@ -257,15 +257,16 @@ export default function TripViewerPage({ params }: Props) {
             </select>
           </div>
 
+          <DayNav items={dayNavItems} />
+
           {days.length === 0 && attractions.length === 0 ? (
             <p className={styles.empty}>Nenhum dia ou atração cadastrada.</p>
           ) : (
             <ol className={styles.timeline}>
               {days.map((day) => {
                 const list = byDay.get(day.id) || [];
-                if (dayFilter && day.id !== dayFilter) return null;
                 return (
-                  <li key={day.id} className={styles.dayBlock}>
+                  <li key={day.id} id={day.id} className={styles.dayBlock}>
                     <div className={styles.dayHead}>
                       <span className={styles.dayOrder}>Dia {day.order + 1}</span>
                       <span className={styles.dayDate}>
@@ -287,7 +288,7 @@ export default function TripViewerPage({ params }: Props) {
                 );
               })}
 
-              {(byDay.get("__none__") || []).length > 0 && !dayFilter && (
+              {(byDay.get("__none__") || []).length > 0 && (
                 <li className={styles.dayBlock}>
                   <div className={styles.dayHead}>
                     <span className={styles.dayOrder}>Sem dia</span>
@@ -312,6 +313,7 @@ export default function TripViewerPage({ params }: Props) {
             </Link>
           </div>
         )}
+        <ToastsContainer toasts={toasts} onClose={removeToast} />
       </article>
     </>
   );
@@ -343,5 +345,16 @@ function AttractionCard({
         )}
       </div>
     </Link>
+  );
+}
+
+function TripViewerSkeleton() {
+  return (
+    <div className={styles.skeletonHero}>
+      <div className={styles.skeletonSection}>
+        <div className={`${styles.skeletonLine} ${styles.wide}`} />
+        <div className={`${styles.skeletonLine} ${styles.short}`} />
+      </div>
+    </div>
   );
 }
