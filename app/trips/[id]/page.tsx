@@ -90,7 +90,7 @@ export default function TripViewerPage({ params }: Props) {
     return (
       <>
         <PublicHeader />
-        <main className={styles.main}>Carregando…</main>
+        <TripViewerSkeleton />
       </>
     );
   }
@@ -343,5 +343,16 @@ function AttractionCard({
         )}
       </div>
     </Link>
+  );
+}
+
+function TripViewerSkeleton() {
+  return (
+    <div className={styles.skeletonHero}>
+      <div className={styles.skeletonSection}>
+        <div className={`${styles.skeletonLine} ${styles.wide}`} />
+        <div className={`${styles.skeletonLine} ${styles.short}`} />
+      </div>
+    </div>
   );
 }

@@ -15,27 +15,23 @@
 .hero {
   position: relative;
   width: 100%;
-  max-height: 90vh;
+  height: 60vh;
+  min-height: 380px;
+  max-height: 640px;
   overflow: hidden;
-  background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: var(--bg-secondary);
 }
 
 .heroImg {
   display: block;
-  max-width: 100%;
-  max-height: 90vh;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .heroPlaceholder {
-  min-height: 380px;
-  height: 60vh;
-  max-height: 640px;
   width: 100%;
+  height: 100%;
   background: var(--bg-secondary);
 }
 
@@ -422,4 +418,39 @@
 
 .adminLink:hover {
   background: var(--bg-hover);
+}
+
+.skeletonHero {
+  width: 100%;
+  height: 60vh;
+  min-height: 380px;
+  max-height: 640px;
+  background: var(--bg-secondary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeletonSection {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skeletonLine {
+  height: 1rem;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeletonLine.wide {
+  width: 70%;
+  height: 1.75rem;
+}
+
+.skeletonLine.short {
+  width: 40%;
 }
