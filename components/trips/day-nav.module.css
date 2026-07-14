@@ -1,0 +1,42 @@
+.dayNav {
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.75rem 0;
+  margin-bottom: 1.5rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  scrollbar-width: none;
+}
+
+.dayNav::-webkit-scrollbar {
+  display: none;
+}
+
+.pill {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--clay-soft);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.pill:hover {
+  background: var(--bg-hover);
+}
+
+.active {
+  background: var(--accent);
+  color: white;
+}

@@ -21,6 +21,7 @@ import {
 } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
 import { ShareButton } from "@/components/trips/share-button";
+import { DayNav, type DayNavItem } from "@/components/trips/day-nav";
 import { useToast, ToastsContainer } from "@/components/toast";
 import styles from "./trip-viewer.module.css";
 
@@ -126,6 +127,10 @@ export default function TripViewerPage({ params }: Props) {
 
   const length = daysBetween(trip.startDate, trip.endDate);
   const usedTypes = Array.from(new Set(attractions.map((a) => a.type))) as AT[];
+  const dayNavItems: DayNavItem[] = days.map((d) => ({
+    id: d.id,
+    label: `Dia ${d.order + 1}`,
+  }));
 
   return (
     <>
@@ -266,6 +271,8 @@ export default function TripViewerPage({ params }: Props) {
             </select>
           </div>
 
+          <DayNav items={dayNavItems} />
+
           {days.length === 0 && attractions.length === 0 ? (
             <p className={styles.empty}>Nenhum dia ou atração cadastrada.</p>
           ) : (
@@ -274,7 +281,7 @@ export default function TripViewerPage({ params }: Props) {
                 const list = byDay.get(day.id) || [];
                 if (dayFilter && day.id !== dayFilter) return null;
                 return (
-                  <li key={day.id} className={styles.dayBlock}>
+                  <li key={day.id} id={day.id} className={styles.dayBlock}>
                     <div className={styles.dayHead}>
                       <span className={styles.dayOrder}>Dia {day.order + 1}</span>
                       <span className={styles.dayDate}>
