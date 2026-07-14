@@ -20,6 +20,8 @@ import {
   daysBetween,
 } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
+import { ShareButton } from "@/components/trips/share-button";
+import { useToast, ToastsContainer } from "@/components/toast";
 import styles from "./trip-viewer.module.css";
 
 interface Props {
@@ -29,6 +31,7 @@ interface Props {
 export default function TripViewerPage({ params }: Props) {
   const tripId = params.id;
   const { user, isAdmin } = useAuth();
+  const { toasts, addToast, removeToast } = useToast();
 
   const [trip, setTrip] = useState<TripDoc | null>(null);
   const [days, setDays] = useState<DayDoc[]>([]);
@@ -135,6 +138,12 @@ export default function TripViewerPage({ params }: Props) {
           ) : (
             <div className={styles.heroPlaceholder} />
           )}
+          <div className={styles.heroActions}>
+            <ShareButton
+              title={trip.title}
+              onCopied={() => addToast("Link copiado!", "success")}
+            />
+          </div>
           <div className={styles.heroOverlay}>
             <div className={styles.heroInner}>
               <p className={styles.eyebrow}>
@@ -312,6 +321,7 @@ export default function TripViewerPage({ params }: Props) {
             </Link>
           </div>
         )}
+        <ToastsContainer toasts={toasts} onClose={removeToast} />
       </article>
     </>
   );
