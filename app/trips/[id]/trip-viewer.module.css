@@ -221,6 +221,7 @@
 .search,
 .select {
   padding: 0.75rem 0.9rem;
+  min-height: 44px;
   border-radius: 10px;
   border: none;
   background: var(--clay-soft);
@@ -228,6 +229,18 @@
   font-size: 0.93rem;
   font-family: inherit;
   transition: all 0.2s ease;
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search,
+  .select {
+    width: 100%;
+  }
 }
 
 .search:focus,
