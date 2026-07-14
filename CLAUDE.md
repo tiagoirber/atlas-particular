@@ -100,7 +100,11 @@ Atlas Particular/
 │   │   ├── trip-form-wizard.module.css
 │   │   ├── trip-card.tsx         # Card for trip grid
 │   │   ├── trip-card.module.css
-│   │   └── trip-card-grid.tsx    # Grid layout
+│   │   ├── trip-card-grid.tsx    # Grid layout
+│   │   ├── share-button.tsx      # Share button on trip viewer hero (Web Share API + clipboard fallback)
+│   │   ├── share-button.module.css
+│   │   ├── day-nav.tsx           # Sticky day nav + scrollspy on trip viewer (IntersectionObserver)
+│   │   └── day-nav.module.css
 │   ├── ui/
 │   │   ├── confirmation-dialog.tsx    # Reusable modal dialog
 │   │   ├── confirmation-dialog.module.css
@@ -181,9 +185,9 @@ These flows **must never break**. Test them manually before every deploy.
 
 ### 4.7 Public Trip Page
 - **Path**: Click "Publicar" or share public link → View public trip page
-- **Key sections**: Header, itinerary timeline (by day), attractions, photos, tags
-- **Files**: `app/trips/[id]/page.tsx`, `trip-viewer.module.css`
-- **Verification**: Public can view published trips (private trips blocked), timeline renders, images load
+- **Key sections**: Header, hero (foto em `cover` + botão compartilhar), navegação sticky por dias (scrollspy), itinerary timeline (by day), attractions, photos, tags
+- **Files**: `app/trips/[id]/page.tsx`, `trip-viewer.module.css`, `components/trips/share-button.tsx`, `components/trips/day-nav.tsx`
+- **Verification**: Public can view published trips (private trips blocked), timeline renders, images load, hero preenche sem letterbox, skeleton aparece no carregamento, botão compartilhar funciona (Web Share API ou fallback de clipboard + toast), pills de dia grudam e destacam o dia visível ao rolar
 
 ### 4.8 Trip Search & Filtering
 - **Path**: Dashboard → Search bar → Type / Filter by country, tags
@@ -383,6 +387,10 @@ Do **NOT** refactor, rename, or change these without explicit justification:
     - Se as mudanças do Passo 2 do `/fim` não forem commitadas (ex.: descartadas numa sessão seguinte por parecerem "sobra"), a próxima sessão parte de informação desatualizada — foi o que aconteceu com dark mode/PWA/responsividade, que ficaram implementados no código mas nunca documentados aqui até esta sessão
     - **Why**: O `/fim` atual já força commit + push só dos arquivos de continuidade (Passo 4) exatamente para evitar isso
 
+12. **No fluxo brainstorming → writing-plans → executing-plans (skills `superpowers`), crie a branch de feature ANTES de commitar o spec e o plano**
+    - Se os docs de `docs/superpowers/specs/` e `docs/superpowers/plans/` forem commitados enquanto ainda na `main`, e só depois a branch de feature for criada a partir dela, esses commits ficam presos na `main` local. Depois do merge (squash) do PR, a `main` local diverge de `origin/main` e exige reconciliação manual (`git reset --hard origin/main`, após confirmar que o conteúdo já está no squash) — foi o que aconteceu no PR #17
+    - **Why**: Evita divergência da `main` local e trabalho de reconciliação depois do merge; a branch deveria existir antes do primeiro commit da sessão de implementação
+
 ---
 
 ## 9. Disciplina de Contexto
@@ -494,7 +502,7 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-07-09)
+### Current State (as of 2026-07-14)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
@@ -518,15 +526,19 @@ Mark these moments in your work:
 - **PWA instalável** (manifest, service worker, ícones reais, offline fallback) (PR #14)
 - **Responsividade mobile corrigida** — hamburger menu no header/admin-nav, step indicators com scroll horizontal (PR #15)
 - **Automação Claude Code** (PR #16): hooks de typecheck/lint + proteção de arquivo sensível, skills `/migrar-schema-firestore` e `/novo-componente`, subagent `testador-golden-path`, MCP `context7` (instalado só localmente nesta máquina — não compartilhado via `.mcp.json`)
+- **Melhoria de UX da página pública de viagem** (PR #17, mergeado em 2026-07-14): hero em `object-fit: cover` (sem letterbox), skeleton de carregamento no lugar do texto "Carregando…", botão de compartilhar (Web Share API no mobile + fallback de clipboard/toast no desktop), navegação sticky por dias com scrollspy (`components/trips/day-nav.tsx`), dropdown de filtro por dia removido (redundante com a nav sticky) + alvo de toque maior nos controles mobile. Spec e plano em `docs/superpowers/specs/2026-07-13-trip-viewer-ux-design.md` e `docs/superpowers/plans/2026-07-13-trip-viewer-ux.md`
 
 ⚠️ **Known Issues**:
 - No pagination on large trip lists (could be slow 100+ trips)
 - Branches locais antigas (`chore/skills-de-deploy`, `chore/verify-skill-e-regra-claude`, `design/arquivo-pessoal`, `fix/hero-foto-inteira`, `fix/layout-e-videos`, `fix/photo-upload-filelist`, `fix/storage-rules-videos`) ainda não verificadas quanto a estarem mescladas — não deletar sem antes conferir `git diff origin/main..<branch> --stat`
+- `npm run build` local pode falhar com `SELF_SIGNED_CERT_IN_CHAIN` ao buscar as fontes do Google (`next/font`) — rede/antivírus da máquina interceptando TLS, não é bug do código. Não bloqueia deploy (Vercel builda sem esse problema); use `npm run typecheck` + `npm run lint` como verificação automatizada local
+- Ferramentas de browser (Chrome DevTools MCP, usadas pelo subagent `testador-golden-path`) nem sempre estão conectadas na sessão — confirmar que estão disponíveis (`ToolSearch`) antes de prometer verificação visual; se não estiverem, reportar isso explicitamente em vez de pular a verificação
 
 ### Immediate Next Steps
 
-1. Verificar e limpar as branches locais antigas listadas acima
-2. **Test the golden paths** on production Vercel URL (usar o subagent `testador-golden-path` ou testar manualmente)
+1. **Verificar visualmente em produção as mudanças do PR #17** (hero sem barra preta, skeleton, botão compartilhar, navegação sticky por dias, filtros simplificados) — não foi possível testar no navegador na sessão que implementou (sem ferramentas de Chrome DevTools MCP disponíveis)
+2. Verificar e limpar as branches locais antigas listadas acima
+3. **Test the golden paths** on production Vercel URL (usar o subagent `testador-golden-path` ou testar manualmente, confirmando antes que as ferramentas de browser estão conectadas)
 
 ### Future Considerations
 
@@ -566,6 +578,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-07-09 (automação Claude Code: hooks, skills, subagent, context7; correção de estado atual desatualizado)  
+**Last updated**: 2026-07-14 (melhoria de UX da página pública de viagem — PR #17; lição sobre criar branch antes de commitar spec/plano)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
