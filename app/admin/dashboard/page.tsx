@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTrips } from "@/hooks/useTrips";
 import { useAuth } from "@/lib/auth-context";
 import { formatDateRange, toDate } from "@/utils/date";
@@ -11,14 +12,24 @@ import styles from "./dashboard.module.css";
 const PAGE_SIZE = 24;
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<section className={styles.container}>Carregando…</section>}>
+      <DashboardInner />
+    </Suspense>
+  );
+}
+
+function DashboardInner() {
   const { user } = useAuth();
   const { trips, loading, error, refresh } = useTrips();
+  const searchParams = useSearchParams();
+  const statusFilter = searchParams.get("filter") === "draft" ? "draft" : null;
   const [search, setSearch] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [search]);
+  }, [search, statusFilter]);
 
   const sorted = useMemo(() => {
     return [...trips].sort((a, b) => {
@@ -34,9 +45,10 @@ export default function DashboardPage() {
   }, [sorted]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return sorted;
+    const base = statusFilter ? sorted.filter((trip) => trip.status === statusFilter) : sorted;
+    if (!search.trim()) return base;
     const term = search.trim().toLowerCase();
-    return sorted.filter((trip) => {
+    return base.filter((trip) => {
       return (
         trip.title?.toLowerCase().includes(term) ||
         trip.destination?.toLowerCase().includes(term) ||
@@ -45,7 +57,7 @@ export default function DashboardPage() {
         trip.searchKeywords?.some((k) => k.toLowerCase().includes(term))
       );
     });
-  }, [sorted, search]);
+  }, [sorted, search, statusFilter]);
 
   const counts = useMemo(() => {
     return {
@@ -151,7 +163,14 @@ export default function DashboardPage() {
 
       {/* Search & Browse */}
       <section className={styles.browseSection}>
-        <h2 className={styles.sectionTitle}>Todas as viagens</h2>
+        <h2 className={styles.sectionTitle}>
+          {statusFilter === "draft" ? "Rascunhos" : "Todas as viagens"}
+        </h2>
+        {statusFilter && (
+          <Link href="/admin/dashboard" className={styles.linkBtn}>
+            Limpar filtro
+          </Link>
+        )}
         <input
           type="search"
           placeholder="Buscar por título, destino, cidade ou tag…"
@@ -174,9 +193,13 @@ export default function DashboardPage() {
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>
             <p>
-              {search ? "Nenhuma viagem encontrada com essa busca." : "Você ainda não registrou nenhuma viagem."}
+              {search
+                ? "Nenhuma viagem encontrada com essa busca."
+                : statusFilter === "draft"
+                  ? "Nenhum rascunho no momento."
+                  : "Você ainda não registrou nenhuma viagem."}
             </p>
-            {!search && (
+            {!search && !statusFilter && (
               <Link href="/admin/trips/new" className={styles.cta}>
                 + Nova viagem
               </Link>
