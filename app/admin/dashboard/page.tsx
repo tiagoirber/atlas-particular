@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTrips } from "@/hooks/useTrips";
 import { useAuth } from "@/lib/auth-context";
@@ -8,10 +8,17 @@ import { formatDateRange, toDate } from "@/utils/date";
 import { TripCardGrid } from "@/components/trips/trip-card-grid";
 import styles from "./dashboard.module.css";
 
+const PAGE_SIZE = 24;
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const { trips, loading, error, refresh } = useTrips();
   const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search]);
 
   const sorted = useMemo(() => {
     return [...trips].sort((a, b) => {
@@ -176,7 +183,20 @@ export default function DashboardPage() {
             )}
           </div>
         ) : (
-          <TripCardGrid trips={filtered} onChanged={refresh} />
+          <>
+            <TripCardGrid trips={filtered.slice(0, visibleCount)} onChanged={refresh} />
+            {filtered.length > visibleCount && (
+              <div className={styles.loadMoreWrap}>
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+                  className={styles.loadMoreBtn}
+                >
+                  Carregar mais ({filtered.length - visibleCount} restantes)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
     </section>
