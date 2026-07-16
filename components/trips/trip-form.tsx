@@ -6,6 +6,7 @@ import type { TripDoc, TripFormData } from "@/types/trip";
 import { useAuth } from "@/lib/auth-context";
 import { createTrip, updateTrip } from "@/lib/trips-service";
 import { uploadTripCover, deleteFromStorage } from "@/lib/storage-service";
+import { describeFirebaseError } from "@/lib/firebase-errors";
 import { toInputDate } from "@/utils/date";
 import { parseCsv, toCsv } from "@/utils/format";
 import { validateImageFile } from "@/utils/validators";
@@ -128,7 +129,7 @@ export function TripForm({ trip }: Props) {
         deleteFromStorage(oldPath).catch(() => undefined);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao subir imagem.");
+      setError(describeFirebaseError(err, "Erro ao subir imagem."));
     } finally {
       setUploadingCover(false);
     }
@@ -161,7 +162,7 @@ export function TripForm({ trip }: Props) {
         return;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao salvar viagem.");
+      setError(describeFirebaseError(err, "Erro ao salvar viagem."));
     } finally {
       setSaving(false);
     }
