@@ -200,7 +200,9 @@ export function TripFormWizard({ trip }: Props) {
         };
         const id = await createTrip(user.uid, payload);
         setSavedTripId(id);
-        setSuccess("Viagem salva! Agora adicione suas atrações.");
+        setSuccess(
+          "Sua viagem já foi salva como rascunho no painel — mesmo se você sair agora, ela vai continuar lá. Agora adicione suas atrações.",
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Erro ao salvar viagem antes de adicionar atrações.",

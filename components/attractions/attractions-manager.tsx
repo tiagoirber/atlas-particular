@@ -121,6 +121,14 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   const [filterDayId, setFilterDayId] = useState<string>("");
   const [pendingDelete, setPendingDelete] = useState<AttractionDoc | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // true quando a atração só existe no Firestore porque um upload a criou
+  // automaticamente antes do usuário clicar em "Salvar alterações"
+  const [persistedByUpload, setPersistedByUpload] = useState(false);
+
+  function applyPersisted(update: Partial<AttractionFormData>) {
+    setDraft((d) => ({ ...d, ...update }));
+    setOriginalDraft((d) => (d ? { ...d, ...update } : d));
+  }
 
   // Detectar mudanças não salvas
   const hasUnsavedChanges = useMemo(() => {
@@ -142,6 +150,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     setDraft(emptyFormData);
     setOriginalDraft(emptyFormData);
     setActionError("");
+    setPersistedByUpload(false);
   }
 
   function startEdit(att: AttractionDoc) {
@@ -151,13 +160,31 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     setDraft(fromDocData);
     setOriginalDraft(fromDocData);
     setActionError("");
+    setPersistedByUpload(false);
   }
 
-  function cancel() {
+  function resetForm() {
     setCreating(false);
     setEditingId(null);
     setOriginalDraft(null);
     setActionError("");
+    setPersistedByUpload(false);
+  }
+
+  async function cancel() {
+    if (persistedByUpload && editingId) {
+      const idToDiscard = editingId;
+      resetForm();
+      try {
+        await deleteAttraction(tripId, idToDiscard);
+        await refresh();
+        onChanged?.();
+      } catch (err) {
+        console.error("cancel(): falha ao descartar atração criada por upload:", err);
+      }
+      return;
+    }
+    resetForm();
   }
 
   async function save() {
@@ -175,7 +202,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       }
       await refresh();
       onChanged?.();
-      cancel();
+      resetForm();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Erro ao salvar atração.");
     } finally {
@@ -219,11 +246,12 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         // Auto-save atração antes de fazer upload da foto
         currentId = await createAttraction(tripId, draft);
         setEditingId(currentId);
+        setPersistedByUpload(true);
       }
       const oldPath = draft.coverImagePath;
       const { url, storagePath } = await uploadAttractionCover(tripId, currentId, file);
       await updateAttractionCover(tripId, currentId, url, storagePath);
-      setDraft((d) => ({ ...d, coverImageUrl: url, coverImagePath: storagePath }));
+      applyPersisted({ coverImageUrl: url, coverImagePath: storagePath });
       if (oldPath && oldPath !== storagePath) {
         await deleteFromStorage(oldPath).catch(() => undefined);
       }
@@ -241,7 +269,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   async function removeCover() {
     if (!editingId) return;
     const path = draft.coverImagePath;
-    setDraft((d) => ({ ...d, coverImageUrl: "", coverImagePath: "" }));
+    applyPersisted({ coverImageUrl: "", coverImagePath: "" });
     await updateAttractionCover(tripId, editingId, "", "");
     if (path) await deleteFromStorage(path);
     await refresh();
@@ -261,6 +289,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         // Auto-save atração antes de fazer upload das fotos
         currentId = await createAttraction(tripId, draft);
         setEditingId(currentId);
+        setPersistedByUpload(true);
       }
       const uploaded: Photo[] = [];
       const base = draft.photos?.length || 0;
@@ -270,7 +299,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       }
       const updated = [...(draft.photos || []), ...uploaded];
       await setAttractionPhotos(tripId, currentId, updated);
-      setDraft((d) => ({ ...d, photos: updated }));
+      applyPersisted({ photos: updated });
       await refresh();
       setActionSuccess(`✅ ${files.length} foto(s) adicionada(s) com sucesso!`);
     } catch (err) {
@@ -288,7 +317,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       (p) => p.storagePath !== photo.storagePath,
     );
     await setAttractionPhotos(tripId, editingId, remaining);
-    setDraft((d) => ({ ...d, photos: remaining }));
+    applyPersisted({ photos: remaining });
     if (photo.storagePath) await deleteFromStorage(photo.storagePath);
     await refresh();
   }
@@ -299,7 +328,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       p.storagePath === photo.storagePath ? { ...p, caption } : p,
     );
     await setAttractionPhotos(tripId, editingId, updated);
-    setDraft((d) => ({ ...d, photos: updated }));
+    applyPersisted({ photos: updated });
   }
 
   async function handleUploadVideo(file: File, onProgress: (pct: number) => void) {
@@ -315,12 +344,13 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         }
         currentId = await createAttraction(tripId, draft);
         setEditingId(currentId);
+        setPersistedByUpload(true);
       }
       const base = draft.videos?.length || 0;
       const video = await uploadAttractionVideo(tripId, currentId, file, onProgress);
       const updated: Video[] = [...(draft.videos || []), { ...video, order: base }];
       await setAttractionVideos(tripId, currentId, updated);
-      setDraft((d) => ({ ...d, videos: updated }));
+      applyPersisted({ videos: updated });
       await refresh();
       setActionSuccess("✅ Vídeo adicionado com sucesso!");
     } catch (err) {
@@ -339,7 +369,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         : v.storagePath !== video.storagePath,
     );
     await setAttractionVideos(tripId, editingId, remaining);
-    setDraft((d) => ({ ...d, videos: remaining }));
+    applyPersisted({ videos: remaining });
     if (video.storagePath) await deleteFromStorage(video.storagePath);
     await refresh();
   }
@@ -353,7 +383,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       return match ? { ...v, caption } : v;
     });
     await setAttractionVideos(tripId, editingId, updated);
-    setDraft((d) => ({ ...d, videos: updated }));
+    applyPersisted({ videos: updated });
   }
 
   async function handleAddYoutubeVideo(youtubeId: string) {
@@ -369,6 +399,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         }
         currentId = await createAttraction(tripId, draft);
         setEditingId(currentId);
+        setPersistedByUpload(true);
       }
       const base = draft.videos?.length || 0;
       const newVideo: Video = {
@@ -381,7 +412,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       };
       const updated: Video[] = [...(draft.videos || []), newVideo];
       await setAttractionVideos(tripId, currentId, updated);
-      setDraft((d) => ({ ...d, videos: updated }));
+      applyPersisted({ videos: updated });
       await refresh();
       setActionSuccess("✅ Vídeo do YouTube adicionado!");
     } catch (err) {
