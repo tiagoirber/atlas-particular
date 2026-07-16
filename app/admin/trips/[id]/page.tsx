@@ -8,6 +8,7 @@ import { deleteTrip } from "@/lib/trips-service";
 import { TripForm } from "@/components/trips/trip-form";
 import { DaysManager } from "@/components/days/days-manager";
 import { AttractionsManager } from "@/components/attractions/attractions-manager";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import styles from "../trips.module.css";
 
 type Tab = "info" | "days" | "attractions";
@@ -20,24 +21,21 @@ export default function EditTripPage({ params }: PageProps) {
   const router = useRouter();
   const { trip, loading, error, refresh } = useTrip(params.id);
   const [tab, setTab] = useState<Tab>("info");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  async function handleDelete() {
+  async function confirmDelete() {
     if (!trip) return;
-
-    const confirmed = window.confirm(
-      `Excluir "${trip.title}"?\n\nEsta ação é irreversível. Todas as atrações e fotos serão deletadas.`
-    );
-
-    if (!confirmed) return;
-
     setDeleting(true);
+    setDeleteError(null);
     try {
       await deleteTrip(params.id);
       router.push("/admin/dashboard");
     } catch (err) {
-      alert(`Erro ao excluir viagem: ${err instanceof Error ? err.message : "Desconhecido"}`);
+      setDeleteError(err instanceof Error ? err.message : "Erro desconhecido ao excluir viagem.");
       setDeleting(false);
+      setConfirmingDelete(false);
     }
   }
 
@@ -105,7 +103,7 @@ export default function EditTripPage({ params }: PageProps) {
         <button
           type="button"
           className={`${styles.tab} ${styles.tabDanger}`}
-          onClick={handleDelete}
+          onClick={() => setConfirmingDelete(true)}
           disabled={deleting}
           title="Excluir viagem"
         >
@@ -113,11 +111,24 @@ export default function EditTripPage({ params }: PageProps) {
         </button>
       </nav>
 
+      {deleteError && <p className={styles.error}>{deleteError}</p>}
+
       {tab === "info" && <TripForm trip={trip} />}
       {tab === "days" && <DaysManager tripId={trip.id} onChanged={refresh} />}
       {tab === "attractions" && (
         <AttractionsManager tripId={trip.id} onChanged={refresh} />
       )}
+
+      <ConfirmationDialog
+        isOpen={confirmingDelete}
+        title="Excluir viagem"
+        message={`Excluir "${trip.title}"? Esta ação é irreversível. Todas as atrações e fotos serão deletadas.`}
+        confirmText="Excluir"
+        isDangerous
+        isLoading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </section>
   );
 }

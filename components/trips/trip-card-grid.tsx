@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { TripDoc } from "@/types/trip";
 import { formatDateRange } from "@/utils/date";
 import { deleteTrip } from "@/lib/trips-service";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import styles from "./trip-card-grid.module.css";
 
 interface Props {
@@ -13,14 +14,13 @@ interface Props {
 }
 
 export function TripCardGrid({ trips, onChanged }: Props) {
+  const [pendingDelete, setPendingDelete] = useState<TripDoc | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleDelete(trip: TripDoc) {
-    const confirmed = window.confirm(
-      `Excluir a viagem "${trip.title}"? Isso remove dias, atrações e fotos associadas. Essa ação não pode ser desfeita.`,
-    );
-    if (!confirmed) return;
+  async function confirmDelete() {
+    const trip = pendingDelete;
+    if (!trip) return;
     setError(null);
     setDeletingId(trip.id);
     try {
@@ -30,6 +30,7 @@ export function TripCardGrid({ trips, onChanged }: Props) {
       setError(err instanceof Error ? err.message : "Erro ao excluir viagem.");
     } finally {
       setDeletingId(null);
+      setPendingDelete(null);
     }
   }
 
@@ -86,7 +87,7 @@ export function TripCardGrid({ trips, onChanged }: Props) {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => handleDelete(trip)}
+                  onClick={() => setPendingDelete(trip)}
                   className={styles.deleteBtn}
                   disabled={deletingId === trip.id}
                 >
@@ -97,6 +98,16 @@ export function TripCardGrid({ trips, onChanged }: Props) {
           </li>
         ))}
       </ul>
+      <ConfirmationDialog
+        isOpen={!!pendingDelete}
+        title="Excluir viagem"
+        message={`Excluir a viagem "${pendingDelete?.title}"? Isso remove dias, atrações e fotos associadas. Essa ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        isDangerous
+        isLoading={!!pendingDelete && deletingId === pendingDelete.id}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </>
   );
 }

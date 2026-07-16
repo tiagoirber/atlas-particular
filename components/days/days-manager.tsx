@@ -9,6 +9,7 @@ import {
 } from "@/lib/days-service";
 import type { DayDoc, DayFormData } from "@/types/day";
 import { toInputDate, formatLongDate } from "@/utils/date";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import styles from "./days-manager.module.css";
 
 interface Props {
@@ -43,6 +44,8 @@ export function DaysManager({ tripId, onChanged }: Props) {
   const [draft, setDraft] = useState<DayFormData>(emptyDay(0));
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<DayDoc | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   function startCreate() {
     setCreating(true);
@@ -87,8 +90,10 @@ export function DaysManager({ tripId, onChanged }: Props) {
     }
   }
 
-  async function handleDelete(day: DayDoc) {
-    if (!window.confirm(`Excluir o dia "${day.title || formatLongDate(day.date)}"?`)) return;
+  async function confirmDelete() {
+    const day = pendingDelete;
+    if (!day) return;
+    setDeleting(true);
     setActionError("");
     try {
       await deleteDay(tripId, day.id);
@@ -96,6 +101,9 @@ export function DaysManager({ tripId, onChanged }: Props) {
       onChanged?.();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Erro ao excluir dia.");
+    } finally {
+      setDeleting(false);
+      setPendingDelete(null);
     }
   }
 
@@ -148,7 +156,7 @@ export function DaysManager({ tripId, onChanged }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleDelete(day)}
+                  onClick={() => setPendingDelete(day)}
                   className={`${styles.linkBtn} ${styles.danger}`}
                 >
                   🗑️ Excluir
@@ -158,6 +166,17 @@ export function DaysManager({ tripId, onChanged }: Props) {
           ))}
         </ul>
       )}
+
+      <ConfirmationDialog
+        isOpen={!!pendingDelete}
+        title="Excluir dia"
+        message={`Excluir o dia "${pendingDelete?.title || (pendingDelete ? formatLongDate(pendingDelete.date) : "")}"? Atrações ligadas a este dia não serão apagadas.`}
+        confirmText="Excluir"
+        isDangerous
+        isLoading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </section>
   );
 }

@@ -34,6 +34,7 @@ import { PhotoUploader } from "@/components/photos/photo-uploader";
 import { PhotoGallery } from "@/components/photos/photo-gallery";
 import { VideoUploader } from "@/components/photos/video-uploader";
 import { VideoGallery } from "@/components/photos/video-gallery";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
 import styles from "./attractions-manager.module.css";
 
 interface Props {
@@ -118,6 +119,8 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
   const [filterDayId, setFilterDayId] = useState<string>("");
+  const [pendingDelete, setPendingDelete] = useState<AttractionDoc | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Detectar mudanças não salvas
   const hasUnsavedChanges = useMemo(() => {
@@ -180,8 +183,10 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     }
   }
 
-  async function handleDelete(att: AttractionDoc) {
-    if (!window.confirm(`Excluir "${att.title}"? Fotos e cover serão removidas.`)) return;
+  async function confirmDelete() {
+    const att = pendingDelete;
+    if (!att) return;
+    setDeleting(true);
     setActionError("");
     try {
       await deleteAttraction(tripId, att.id);
@@ -189,6 +194,9 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       onChanged?.();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Erro ao excluir atração.");
+    } finally {
+      setDeleting(false);
+      setPendingDelete(null);
     }
   }
 
@@ -490,7 +498,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(att)}
+                    onClick={() => setPendingDelete(att)}
                     className={`${styles.linkBtn} ${styles.danger}`}
                   >
                     Excluir
@@ -501,6 +509,17 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
           ))}
         </ul>
       )}
+
+      <ConfirmationDialog
+        isOpen={!!pendingDelete}
+        title="Excluir atração"
+        message={`Excluir "${pendingDelete?.title}"? Fotos e cover serão removidas.`}
+        confirmText="Excluir"
+        isDangerous
+        isLoading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </section>
   );
 }
