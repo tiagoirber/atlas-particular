@@ -10,6 +10,7 @@ import {
 import type { DayDoc, DayFormData } from "@/types/day";
 import { toInputDate, formatLongDate } from "@/utils/date";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { describeFirebaseError } from "@/lib/firebase-errors";
 import styles from "./days-manager.module.css";
 
 interface Props {
@@ -84,7 +85,7 @@ export function DaysManager({ tripId, onChanged }: Props) {
       onChanged?.();
       cancel();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Erro ao salvar dia.");
+      setActionError(describeFirebaseError(err, "Erro ao salvar dia."));
     } finally {
       setSaving(false);
     }
@@ -100,7 +101,7 @@ export function DaysManager({ tripId, onChanged }: Props) {
       await refresh();
       onChanged?.();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Erro ao excluir dia.");
+      setActionError(describeFirebaseError(err, "Erro ao excluir dia."));
     } finally {
       setDeleting(false);
       setPendingDelete(null);

@@ -35,6 +35,7 @@ import { PhotoGallery } from "@/components/photos/photo-gallery";
 import { VideoUploader } from "@/components/photos/video-uploader";
 import { VideoGallery } from "@/components/photos/video-gallery";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { describeFirebaseError } from "@/lib/firebase-errors";
 import styles from "./attractions-manager.module.css";
 
 interface Props {
@@ -204,7 +205,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       onChanged?.();
       resetForm();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Erro ao salvar atração.");
+      setActionError(describeFirebaseError(err, "Erro ao salvar atração."));
     } finally {
       setSaving(false);
     }
@@ -220,7 +221,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       await refresh();
       onChanged?.();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Erro ao excluir atração.");
+      setActionError(describeFirebaseError(err, "Erro ao excluir atração."));
     } finally {
       setDeleting(false);
       setPendingDelete(null);

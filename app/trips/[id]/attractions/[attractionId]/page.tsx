@@ -16,6 +16,7 @@ import { PhotoGallery } from "@/components/photos/photo-gallery";
 import { VideoGallery } from "@/components/photos/video-gallery";
 import { formatLongDate } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
+import { describeFirebaseError } from "@/lib/firebase-errors";
 import styles from "./attraction-viewer.module.css";
 
 interface Props {
@@ -43,7 +44,7 @@ export default function AttractionViewerPage({ params }: Props) {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Erro ao carregar.");
+        setError(describeFirebaseError(err, "Erro ao carregar a atração."));
       })
       .finally(() => !cancelled && setLoading(false));
     return () => {
