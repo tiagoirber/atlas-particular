@@ -133,8 +133,8 @@ export function TripFormWizard({ trip }: Props) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function canProceed(): boolean {
-    switch (currentStep) {
+  function canProceedFromStep(step: Step): boolean {
+    switch (step) {
       case "basics":
         return !!(form.title && form.destination && form.country);
       case "dates":
@@ -154,7 +154,24 @@ export function TripFormWizard({ trip }: Props) {
     }
   }
 
+  function canProceed(): boolean {
+    return canProceedFromStep(currentStep);
+  }
+
   function goToStep(step: Step) {
+    const targetIndex = steps.indexOf(step);
+    const currentIndex = steps.indexOf(currentStep);
+    if (targetIndex > currentIndex) {
+      const firstIncomplete = steps
+        .slice(0, targetIndex)
+        .find((s) => !canProceedFromStep(s));
+      if (firstIncomplete) {
+        setCurrentStep(firstIncomplete);
+        setError(`Complete a etapa "${stepLabels[firstIncomplete]}" antes de continuar.`);
+        setSuccess("");
+        return;
+      }
+    }
     setCurrentStep(step);
     setError("");
     setSuccess("");
@@ -244,6 +261,18 @@ export function TripFormWizard({ trip }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (form.status === "published") {
+      const firstIncomplete = steps
+        .slice(0, steps.indexOf("review"))
+        .find((s) => !canProceedFromStep(s));
+      if (firstIncomplete) {
+        setCurrentStep(firstIncomplete);
+        setError(
+          `Complete a etapa "${stepLabels[firstIncomplete]}" antes de publicar a viagem.`,
+        );
+        return;
+      }
+    }
     setSaving(true);
     setError("");
     setSuccess("");
