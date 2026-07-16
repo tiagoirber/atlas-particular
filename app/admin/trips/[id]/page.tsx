@@ -111,7 +111,11 @@ export default function EditTripPage({ params }: PageProps) {
         </button>
       </nav>
 
-      {deleteError && <p className={styles.error}>{deleteError}</p>}
+      {deleteError && (
+        <p className={styles.error} role="alert">
+          {deleteError}
+        </p>
+      )}
 
       {tab === "info" && <TripForm trip={trip} />}
       {tab === "days" && <DaysManager tripId={trip.id} onChanged={refresh} />}

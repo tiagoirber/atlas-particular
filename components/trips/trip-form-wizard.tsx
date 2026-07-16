@@ -333,7 +333,11 @@ export function TripFormWizard({ trip }: Props) {
 
       {/* Form content */}
       <form onSubmit={handleSubmit} className={styles.formContent}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
         {success && <p className={styles.success}>{success}</p>}
 
         {/* Step 1: Basics */}

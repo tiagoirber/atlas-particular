@@ -59,7 +59,11 @@ export function PhotoUploader({
         <span>{busy && progress > 0 ? `Enviando… ${progress}%` : busy ? "Enviando…" : label}</span>
         <small>JPG, PNG ou WEBP · até 8 MB cada</small>
       </label>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

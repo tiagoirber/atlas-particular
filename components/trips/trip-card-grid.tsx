@@ -36,7 +36,11 @@ export function TripCardGrid({ trips, onChanged }: Props) {
 
   return (
     <>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       <ul className={styles.grid}>
         {trips.map((trip) => (
           <li key={trip.id} className={styles.card}>
