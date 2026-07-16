@@ -117,21 +117,30 @@ export async function updateTrip(
   });
 }
 
+function logRejected(context: string, results: PromiseSettledResult<unknown>[]) {
+  results
+    .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+    .forEach((r) => console.error(`[deleteTrip] falha em ${context}:`, r.reason));
+}
+
 export async function deleteTrip(tripId: string): Promise<void> {
-  // Best-effort cascade: subcoleções e arquivos. Falhas individuais não bloqueiam.
+  // Best-effort cascade: subcoleções e arquivos. Falhas individuais não bloqueiam
+  // a exclusão do documento principal, mas ficam registradas no console.
   try {
     const [days, attractions] = await Promise.all([
       listDays(tripId),
       listAttractions(tripId),
     ]);
-    await Promise.allSettled([
+    const results = await Promise.allSettled([
       ...days.map((d) => deleteDay(tripId, d.id)),
       ...attractions.map((a) => deleteAttraction(tripId, a.id)),
     ]);
-  } catch {
-    // ignora — segue para storage e documento
+    logRejected(`subcoleções da viagem ${tripId}`, results);
+  } catch (err) {
+    console.error(`[deleteTrip] falha ao listar subcoleções da viagem ${tripId}:`, err);
   }
-  await Promise.allSettled([deleteTripStorage(tripId)]);
+  const storageResults = await Promise.allSettled([deleteTripStorage(tripId)]);
+  logRejected(`storage da viagem ${tripId}`, storageResults);
   await deleteDoc(doc(firestore, TRIPS, tripId));
 }
 
