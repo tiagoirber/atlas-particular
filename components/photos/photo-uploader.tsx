@@ -8,7 +8,7 @@ interface Props {
   label?: string;
   multiple?: boolean;
   disabled?: boolean;
-  onSelect: (files: File[]) => Promise<void> | void;
+  onSelect: (files: File[], onProgress: (pct: number) => void) => Promise<void> | void;
 }
 
 export function PhotoUploader({
@@ -18,6 +18,7 @@ export function PhotoUploader({
   onSelect,
 }: Props) {
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
 
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -33,13 +34,15 @@ export function PhotoUploader({
       }
     }
     setError("");
+    setProgress(0);
     setBusy(true);
     try {
-      await onSelect(files);
+      await onSelect(files, setProgress);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao enviar imagens.");
     } finally {
       setBusy(false);
+      setProgress(0);
     }
   }
 
@@ -53,7 +56,7 @@ export function PhotoUploader({
           onChange={handleChange}
           disabled={busy || disabled}
         />
-        <span>{busy ? "Enviando…" : label}</span>
+        <span>{busy && progress > 0 ? `Enviando… ${progress}%` : busy ? "Enviando…" : label}</span>
         <small>JPG, PNG ou WEBP · até 8 MB cada</small>
       </label>
       {error && <p className={styles.error}>{error}</p>}
