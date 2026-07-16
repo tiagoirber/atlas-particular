@@ -275,7 +275,7 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
     await refresh();
   }
 
-  async function handleUploadPhotos(files: File[]) {
+  async function handleUploadPhotos(files: File[], onProgress: (pct: number) => void) {
     setSaving(true);
     setActionError("");
     try {
@@ -294,7 +294,9 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
       const uploaded: Photo[] = [];
       const base = draft.photos?.length || 0;
       for (let i = 0; i < files.length; i++) {
-        const photo = await uploadAttractionPhoto(tripId, currentId, files[i]);
+        const photo = await uploadAttractionPhoto(tripId, currentId, files[i], (pct) =>
+          onProgress(Math.round(((i + pct / 100) / files.length) * 100)),
+        );
         uploaded.push({ ...photo, order: base + i });
       }
       const updated = [...(draft.photos || []), ...uploaded];
@@ -568,7 +570,7 @@ interface FormProps {
   onSave: () => void;
   onUploadCover: (file: File) => void;
   onRemoveCover: () => void;
-  onUploadPhotos: (files: File[]) => Promise<void>;
+  onUploadPhotos: (files: File[], onProgress: (pct: number) => void) => Promise<void>;
   onRemovePhoto: (photo: Photo) => void;
   onCaptionChange: (photo: Photo, caption: string) => void;
   onUploadVideo: (file: File, onProgress: (pct: number) => void) => Promise<void>;
