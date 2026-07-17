@@ -170,7 +170,11 @@ export function TripForm({ trip }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       {success && <p className={styles.success}>{success}</p>}
 
       <fieldset className={styles.section}>

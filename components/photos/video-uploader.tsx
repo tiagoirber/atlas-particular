@@ -111,7 +111,11 @@ export function VideoUploader({
         </>
       )}
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

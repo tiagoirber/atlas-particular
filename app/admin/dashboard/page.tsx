@@ -180,7 +180,7 @@ function DashboardInner() {
         />
 
         {error && (
-          <p className={styles.error}>
+          <p className={styles.error} role="alert">
             {error}{" "}
             <button onClick={refresh} className={styles.linkBtn}>
               tentar de novo

@@ -122,8 +122,16 @@ export function DaysManager({ tripId, onChanged }: Props) {
         )}
       </header>
 
-      {actionError && <p className={styles.error}>{actionError}</p>}
-      {error && <p className={styles.error}>{error}</p>}
+      {actionError && (
+        <p className={styles.error} role="alert">
+          {actionError}
+        </p>
+      )}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {(creating || editingId) && (
         <DayForm
@@ -196,8 +204,9 @@ function DayForm({ draft, setDraft, onCancel, onSave, saving, isEditing }: DayFo
     <div className={styles.formCard}>
       <div className={styles.formGrid}>
         <div className={styles.field}>
-          <label>Data *</label>
+          <label htmlFor="day-date">Data *</label>
           <input
+            id="day-date"
             type="date"
             value={typeof draft.date === "string" ? draft.date : toInputDate(draft.date)}
             onChange={(e) => setDraft({ ...draft, date: e.target.value })}
@@ -206,8 +215,9 @@ function DayForm({ draft, setDraft, onCancel, onSave, saving, isEditing }: DayFo
           />
         </div>
         <div className={styles.field}>
-          <label>Ordem</label>
+          <label htmlFor="day-order">Ordem</label>
           <input
+            id="day-order"
             type="number"
             min={0}
             value={draft.order}
@@ -216,8 +226,9 @@ function DayForm({ draft, setDraft, onCancel, onSave, saving, isEditing }: DayFo
           />
         </div>
         <div className={`${styles.field} ${styles.full}`}>
-          <label>Título do dia</label>
+          <label htmlFor="day-title">Título do dia</label>
           <input
+            id="day-title"
             type="text"
             value={draft.title || ""}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
@@ -226,8 +237,9 @@ function DayForm({ draft, setDraft, onCancel, onSave, saving, isEditing }: DayFo
           />
         </div>
         <div className={`${styles.field} ${styles.full}`}>
-          <label>Resumo</label>
+          <label htmlFor="day-summary">Resumo</label>
           <textarea
+            id="day-summary"
             rows={3}
             value={draft.summary || ""}
             onChange={(e) => setDraft({ ...draft, summary: e.target.value })}
@@ -236,8 +248,9 @@ function DayForm({ draft, setDraft, onCancel, onSave, saving, isEditing }: DayFo
           />
         </div>
         <div className={`${styles.field} ${styles.full}`}>
-          <label>Observações</label>
+          <label htmlFor="day-notes">Observações</label>
           <textarea
+            id="day-notes"
             rows={2}
             value={draft.notes || ""}
             onChange={(e) => setDraft({ ...draft, notes: e.target.value })}

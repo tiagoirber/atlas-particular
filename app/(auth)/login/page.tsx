@@ -75,7 +75,11 @@ function LoginInner() {
               disabled={submitting}
             />
           </div>
-          {error && <p className={styles.error}>{error}</p>}
+          {error && (
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+          )}
           <button type="submit" disabled={submitting} className={styles.submit}>
             {submitting ? "Autenticando…" : "Entrar"}
           </button>

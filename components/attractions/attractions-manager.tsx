@@ -463,9 +463,21 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
         </div>
       </header>
 
-      {actionError && <p className={styles.error}>{actionError}</p>}
-      {actionSuccess && <p className={styles.success}>{actionSuccess}</p>}
-      {error && <p className={styles.error}>{error}</p>}
+      {actionError && (
+        <p className={styles.error} role="alert">
+          {actionError}
+        </p>
+      )}
+      {actionSuccess && (
+        <p className={styles.success} role="status">
+          {actionSuccess}
+        </p>
+      )}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {(creating || editingId) && (
         <AttractionForm
@@ -604,8 +616,9 @@ function AttractionForm({
         <h3 className={styles.formSectionTitle}>Dados principais</h3>
         <div className={styles.formGrid}>
           <div className={`${styles.field} ${styles.full}`}>
-            <label>Nome *</label>
+            <label htmlFor="att-title">Nome *</label>
             <input
+              id="att-title"
               type="text"
               value={draft.title}
               onChange={(e) => onUpdate("title", e.target.value)}
@@ -614,8 +627,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Tipo</label>
+            <label htmlFor="att-type">Tipo</label>
             <select
+              id="att-type"
               value={draft.type}
               onChange={(e) => onUpdate("type", e.target.value as AttractionType)}
               disabled={saving}
@@ -628,8 +642,9 @@ function AttractionForm({
             </select>
           </div>
           <div className={styles.field}>
-            <label>Dia da viagem</label>
+            <label htmlFor="att-day">Dia da viagem</label>
             <select
+              id="att-day"
               value={draft.dayId || ""}
               onChange={(e) => onUpdate("dayId", e.target.value)}
               disabled={saving}
@@ -643,8 +658,9 @@ function AttractionForm({
             </select>
           </div>
           <div className={styles.field}>
-            <label>Data da visita</label>
+            <label htmlFor="att-visitDate">Data da visita</label>
             <input
+              id="att-visitDate"
               type="date"
               value={typeof draft.visitDate === "string" ? draft.visitDate : toInputDate(draft.visitDate)}
               onChange={(e) => onUpdate("visitDate", e.target.value)}
@@ -652,8 +668,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Hora da visita</label>
+            <label htmlFor="att-visitTime">Hora da visita</label>
             <input
+              id="att-visitTime"
               type="time"
               value={draft.visitTime || ""}
               onChange={(e) => onUpdate("visitTime", e.target.value)}
@@ -661,8 +678,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Ordem</label>
+            <label htmlFor="att-order">Ordem</label>
             <input
+              id="att-order"
               type="number"
               min={0}
               value={draft.order}
@@ -704,8 +722,9 @@ function AttractionForm({
         <h3 className={styles.formSectionTitle}>Descrição</h3>
         <div className={styles.formGrid}>
           <div className={`${styles.field} ${styles.full}`}>
-            <label>Experiência</label>
+            <label htmlFor="att-description">Experiência</label>
             <textarea
+              id="att-description"
               rows={4}
               value={draft.description || ""}
               onChange={(e) => onUpdate("description", e.target.value)}
@@ -714,8 +733,9 @@ function AttractionForm({
             />
           </div>
           <div className={`${styles.field} ${styles.full}`}>
-            <label>Notas pessoais</label>
+            <label htmlFor="att-notes">Notas pessoais</label>
             <textarea
+              id="att-notes"
               rows={2}
               value={draft.notes || ""}
               onChange={(e) => onUpdate("notes", e.target.value)}
@@ -730,8 +750,9 @@ function AttractionForm({
         <h3 className={styles.formSectionTitle}>Localização & logística</h3>
         <div className={styles.formGrid}>
           <div className={styles.field}>
-            <label>Localização (texto)</label>
+            <label htmlFor="att-locationName">Localização (texto)</label>
             <input
+              id="att-locationName"
               type="text"
               value={draft.locationName || ""}
               onChange={(e) => onUpdate("locationName", e.target.value)}
@@ -740,8 +761,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Link Google Maps</label>
+            <label htmlFor="att-googleMapsUrl">Link Google Maps</label>
             <input
+              id="att-googleMapsUrl"
               type="url"
               value={draft.googleMapsUrl || ""}
               onChange={(e) => onUpdate("googleMapsUrl", e.target.value)}
@@ -750,8 +772,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Distância ou deslocamento</label>
+            <label htmlFor="att-distanceOrTransfer">Distância ou deslocamento</label>
             <input
+              id="att-distanceOrTransfer"
               type="text"
               value={draft.distanceOrTransfer || ""}
               onChange={(e) => onUpdate("distanceOrTransfer", e.target.value)}
@@ -759,8 +782,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Tempo gasto</label>
+            <label htmlFor="att-timeSpent">Tempo gasto</label>
             <input
+              id="att-timeSpent"
               type="text"
               value={draft.timeSpent || ""}
               onChange={(e) => onUpdate("timeSpent", e.target.value)}
@@ -769,8 +793,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Melhor horário para visitar</label>
+            <label htmlFor="att-bestTimeToVisit">Melhor horário para visitar</label>
             <input
+              id="att-bestTimeToVisit"
               type="text"
               value={draft.bestTimeToVisit || ""}
               onChange={(e) => onUpdate("bestTimeToVisit", e.target.value)}
@@ -778,8 +803,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>O que levar</label>
+            <label htmlFor="att-whatToBring">O que levar</label>
             <input
+              id="att-whatToBring"
               type="text"
               value={draft.whatToBring || ""}
               onChange={(e) => onUpdate("whatToBring", e.target.value)}
@@ -793,8 +819,9 @@ function AttractionForm({
         <h3 className={styles.formSectionTitle}>Avaliações</h3>
         <div className={styles.formGrid}>
           <div className={styles.field}>
-            <label>Custo aproximado</label>
+            <label htmlFor="att-approximateCost">Custo aproximado</label>
             <input
+              id="att-approximateCost"
               type="number"
               min={0}
               step="0.01"
@@ -804,8 +831,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Moeda</label>
+            <label htmlFor="att-currency">Moeda</label>
             <select
+              id="att-currency"
               value={draft.currency || "BRL"}
               onChange={(e) => onUpdate("currency", e.target.value)}
               disabled={saving}
@@ -818,8 +846,9 @@ function AttractionForm({
             </select>
           </div>
           <div className={styles.field}>
-            <label>Nota pessoal (0 a 5)</label>
+            <label htmlFor="att-rating">Nota pessoal (0 a 5)</label>
             <input
+              id="att-rating"
               type="number"
               min={0}
               max={5}
@@ -830,8 +859,9 @@ function AttractionForm({
             />
           </div>
           <div className={styles.field}>
-            <label>Dificuldade</label>
+            <label htmlFor="att-difficulty">Dificuldade</label>
             <select
+              id="att-difficulty"
               value={draft.difficulty || "nenhuma"}
               onChange={(e) => onUpdate("difficulty", e.target.value as DifficultyLevel)}
               disabled={saving}
@@ -844,8 +874,9 @@ function AttractionForm({
             </select>
           </div>
           <div className={styles.field}>
-            <label>Esforço físico</label>
+            <label htmlFor="att-physicalEffortLevel">Esforço físico</label>
             <select
+              id="att-physicalEffortLevel"
               value={draft.physicalEffortLevel || "nenhuma"}
               onChange={(e) => onUpdate("physicalEffortLevel", e.target.value as DifficultyLevel)}
               disabled={saving}
@@ -878,8 +909,9 @@ function AttractionForm({
             </label>
           </div>
           <div className={`${styles.field} ${styles.full}`}>
-            <label>Riscos ou pontos de atenção</label>
+            <label htmlFor="att-risksOrWarnings">Riscos ou pontos de atenção</label>
             <textarea
+              id="att-risksOrWarnings"
               rows={2}
               value={draft.risksOrWarnings || ""}
               onChange={(e) => onUpdate("risksOrWarnings", e.target.value)}

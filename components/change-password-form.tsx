@@ -72,7 +72,11 @@ export function ChangePasswordForm() {
         />
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
       {success && <p className={styles.success}>✓ Senha atualizada com sucesso!</p>}
 
       <button type="submit" disabled={loading} className={styles.submit}>
