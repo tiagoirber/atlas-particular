@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { TripDoc, TripFormData } from "@/types/trip";
 import { useAuth } from "@/lib/auth-context";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -534,8 +535,12 @@ export function TripFormWizard({ trip }: Props) {
             <div className={styles.coverArea}>
               {form.coverImageUrl ? (
                 <div className={styles.coverPreview}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.coverImageUrl} alt="Capa da viagem" />
+                  <Image
+                    src={form.coverImageUrl}
+                    alt="Capa da viagem"
+                    fill
+                    sizes="400px"
+                  />
                   <button
                     type="button"
                     onClick={handleRemoveCover}
@@ -644,8 +649,7 @@ export function TripFormWizard({ trip }: Props) {
               </p>
               {form.coverImageUrl && (
                 <div className={styles.reviewImage}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.coverImageUrl} alt={form.title} />
+                  <Image src={form.coverImageUrl} alt={form.title} fill sizes="880px" />
                 </div>
               )}
               <p className={styles.reviewDescription}>{form.generalDescription}</p>

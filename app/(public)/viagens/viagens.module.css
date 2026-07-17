@@ -157,6 +157,7 @@
 }
 
 .cover {
+  position: relative;
   aspect-ratio: 16/9;
   background: var(--bg-hover);
   overflow: hidden;

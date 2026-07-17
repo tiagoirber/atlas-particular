@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PublicHeader } from "@/components/public-header";
 import { listPublishedTrips } from "@/lib/trips-service";
 import { formatDateRange } from "@/utils/date";
@@ -148,8 +149,12 @@ export default function ViagensPage() {
                   <Link href={`/trips/${trip.id}`} className={styles.cardLink}>
                     <div className={styles.cover}>
                       {trip.coverImageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={trip.coverImageUrl} alt={trip.title} />
+                        <Image
+                          src={trip.coverImageUrl}
+                          alt={trip.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 380px"
+                        />
                       ) : (
                         <div className={styles.coverPlaceholder} />
                       )}

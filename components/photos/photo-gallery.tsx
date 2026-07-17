@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { Photo } from "@/types/photo";
 import styles from "./photo-gallery.module.css";
 
@@ -24,8 +25,15 @@ export function PhotoGallery({
     <ul className={styles.grid}>
       {photos.map((photo, idx) => (
         <li key={photo.storagePath || `${photo.url}-${idx}`} className={styles.item}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.url} alt={photo.caption || `Foto ${idx + 1}`} loading="lazy" />
+          <div className={styles.itemImage}>
+            <Image
+              src={photo.url}
+              alt={photo.caption || `Foto ${idx + 1}`}
+              fill
+              sizes="(max-width: 640px) 50vw, 220px"
+              loading="lazy"
+            />
+          </div>
           {editable ? (
             <div className={styles.editable}>
               <input

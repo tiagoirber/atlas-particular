@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PublicHeader } from "@/components/public-header";
 import { useAuth } from "@/lib/auth-context";
 import { getTrip } from "@/lib/trips-service";
@@ -136,8 +137,14 @@ export default function TripViewerPage({ params }: Props) {
       <article className={styles.article}>
         <header className={styles.hero}>
           {trip.coverImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={trip.coverImageUrl} alt={trip.title} className={styles.heroImg} />
+            <Image
+              src={trip.coverImageUrl}
+              alt={trip.title}
+              fill
+              sizes="100vw"
+              priority
+              className={styles.heroImg}
+            />
           ) : (
             <div className={styles.heroPlaceholder} />
           )}
@@ -330,8 +337,12 @@ function AttractionCard({
     <Link href={`/trips/${tripId}/attractions/${att.id}`} className={styles.attCard}>
       <div className={styles.attCover}>
         {att.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={att.coverImageUrl} alt={att.title} />
+          <Image
+            src={att.coverImageUrl}
+            alt={att.title}
+            fill
+            sizes="(max-width: 640px) 100vw, 260px"
+          />
         ) : (
           <div className={styles.attCoverPlaceholder} />
         )}

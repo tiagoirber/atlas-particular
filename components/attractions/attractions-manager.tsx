@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import Image from "next/image";
 import { useAttractions } from "@/hooks/useAttractions";
 import { useDays } from "@/hooks/useDays";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -510,8 +511,12 @@ export function AttractionsManager({ tripId, onChanged }: Props) {
             <li key={att.id} className={styles.card}>
               <div className={styles.cardCover}>
                 {att.coverImageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={att.coverImageUrl} alt={att.title} />
+                  <Image
+                    src={att.coverImageUrl}
+                    alt={att.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 260px"
+                  />
                 ) : (
                   <div className={styles.coverPlaceholder} />
                 )}

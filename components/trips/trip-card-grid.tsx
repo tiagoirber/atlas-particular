@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import type { TripDoc } from "@/types/trip";
 import { formatDateRange } from "@/utils/date";
@@ -50,8 +51,12 @@ export function TripCardGrid({ trips, onChanged }: Props) {
               aria-label={`Editar ${trip.title}`}
             >
               {trip.coverImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={trip.coverImageUrl} alt={trip.title} />
+                <Image
+                  src={trip.coverImageUrl}
+                  alt={trip.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 400px"
+                />
               ) : (
                 <div className={styles.coverPlaceholder} />
               )}

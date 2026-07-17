@@ -16,9 +16,13 @@
   background: var(--bg-primary);
 }
 
-.item img {
+.itemImage {
+  position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+}
+
+.itemImage img {
   object-fit: cover;
   display: block;
 }
