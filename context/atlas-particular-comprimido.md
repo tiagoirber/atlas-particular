@@ -1,5 +1,5 @@
 # Atlas Particular
-> Comprimido em: 2026-07-14 | Sessão: melhoria de UX da página pública de visualização de viagem (fluxo brainstorming → spec → plano → implementação → PR #17 mergeado)
+> Comprimido em: 2026-07-17 | Sessão: paginação do dashboard, revert do hero pra `contain`, e auditoria de UX (10 PRs #20–#29) com verificação por evidência antes de cada fix
 
 ## Objetivo do projeto
 App de diário de viagens privado. Usuários registram viagens, documentam dias com fotos/vídeos e publicam uma página pública da viagem.
@@ -10,87 +10,113 @@ App de diário de viagens privado. Usuários registram viagens, documentam dias 
 - **Backend**: Firebase (Auth email/password, Firestore, Cloud Storage)
 - **Deploy**: Vercel — https://atlas-particular.vercel.app/ (auto-deploy no merge em `main`)
 - **Repo**: `tiagoirber/atlas-particular` (main protegida — sempre via PR)
-- **Node.js**: em `C:\Program Files\nodejs` — já está no PATH do Git Bash
-- **jq NÃO está instalado** neste ambiente — hooks e scripts devem parsear JSON via `node -e`, não `jq`
-- **Deploy via API**: usar skill `/deploy`; token via Windows Credential Manager (classe C# inline, ex. `CMDeployPR`/`CMDeployMerge` — reusar nome se já definido na sessão dá erro, trocar o nome); `gh` CLI **não está instalado**, sempre usar a API REST direto (confirmado nesta sessão)
-- **`npm run build` local pode falhar** com `SELF_SIGNED_CERT_IN_CHAIN` ao buscar fontes do Google (`next/font`) — rede/antivírus da máquina interceptando TLS, não é bug do código; usar Vercel como fonte de verdade do build
-- **MCP instalados**: `context7` (doc lookup, escopo local), `chrome-devtools` (plugin ecc, usado pelo subagent `testador-golden-path`) — **nem sempre conectado na sessão**; confirmar disponibilidade antes de prometer verificação visual (aconteceu nesta sessão: nem a sessão principal nem o subagent tinham acesso)
+- **Deploy via API**: skill `/deploy`; token via Windows Credential Manager (classe C# inline, trocar o nome da classe a cada uso na mesma sessão pra evitar erro de redefinição)
+- **`npm run build` local pode falhar** com `SELF_SIGNED_CERT_IN_CHAIN` (next/font) — não é bug, Vercel builda normal; usar `npm run typecheck` + `npm run lint` localmente
+- **Hook GateGuard ativo**: antes do primeiro `Bash`/`Edit`/`Write` em cada arquivo (às vezes de novo após compactação de contexto), exige declarar importadores/API afetada/schema/instrução do usuário em texto antes da chamada. Comandos destrutivos (`git reset --hard` etc.) exigem factos extras (o que muda, rollback, instrução verbatim). Responder e repetir a chamada — não é bug.
+- **`git pull`/`git checkout` falhando com `unable to write new index file`**: travamento transitório (OneDrive/AV no `.git/index`), não corrupção. Confirmar com `git diff origin/main --stat` (vazio ou só CRLF/LF) antes de `git reset --hard origin/main`.
+- **Chrome DevTools MCP**: `resize_page` não funcionou na sessão de 2026-07-17 (viewport não mudava) — provável causa de loop de screenshots num subagent anterior. Confirmar se voltou a funcionar antes de pedir verificação mobile.
+- **Sem credenciais de login nesta sessão** — nem local nem produção. Golden paths autenticados (dashboard, wizard, CRUD) só foram verificados por typecheck/lint, não visualmente.
 
 ## Estrutura de arquivos relevante
 ```
-app/trips/[id]/
-  page.tsx                    — trip viewer público; hero+share button, DayNav, skeleton, filtros (busca+tipo, SEM dropdown de dia)
-  trip-viewer.module.css       — .hero/.heroImg agora object-fit: cover (não mais contain); .skeleton*; .heroActions
+app/admin/dashboard/page.tsx
+  — paginação client-side (PAGE_SIZE=24, botão "Carregar mais"), filtro ?filter=draft
+    funcional (useSearchParams, componente split em DashboardInner + Suspense wrapper),
+    erro com role="alert", capa da última viagem em next/image (fill)
+app/admin/dashboard/dashboard.module.css
+  — .loadMoreWrap/.loadMoreBtn novos; .lastVoyageImage tem position:relative (pro fill)
 
-components/trips/
-  share-button.tsx / .module.css   — botão compartilhar: navigator.share (mobile) → fallback clipboard+toast (desktop)
-  day-nav.tsx / .module.css        — nav sticky por dia + scrollspy via IntersectionObserver; só renderiza com 2+ dias
+app/trips/[id]/page.tsx (trip viewer público)
+  — hero em object-fit: CONTAIN (revertido no PR #19, next/image fill + priority)
+  — .attCover (card de atração) em next/image fill
 
-components/toast.tsx
-  — useToast() retorna { toasts, addToast, removeToast }; ToastsContainer renderiza a lista (usado pelo share-button via page.tsx)
+app/(public)/viagens/page.tsx — card de capa em next/image fill; header duplicado (bug conhecido, não corrigido)
 
-docs/superpowers/
-  specs/2026-07-13-trip-viewer-ux-design.md   — spec da melhoria de UX (novo padrão de pasta no projeto)
-  plans/2026-07-13-trip-viewer-ux.md          — plano de implementação task-a-task
+app/admin/trips/[id]/page.tsx — delete de viagem via ConfirmationDialog (não mais window.confirm/alert)
 
-types/
-  video.ts          — Video { url, storagePath, youtubeId?, caption, order, uploadedAt }
-  attraction.ts     — AttractionBase: photos: Photo[], videos: Video[]
+components/trips/trip-form-wizard.tsx (~700 linhas, refactor em hooks NÃO feito ainda)
+  — canProceedFromStep(step) parametrizado; goToStep() valida steps intermediários
+    antes de pular via indicador; handleSubmit revalida antes de status="published"
+  — mensagem de autosave explícita ("já foi salva como rascunho... mesmo se sair agora")
+  — cover preview + review image em next/image (fill, aspect-ratio 3/2 fixo)
 
-utils/
-  validators.ts     — validateImageFile (max 12 MB), validateVideoFile (max 500 MB)
+components/attractions/attractions-manager.tsx (~900 linhas, refactor em hooks NÃO feito ainda)
+  — persistedByUpload (state): true quando upload cria a atração automaticamente antes
+    do "Salvar alterações"; cancel() deleta de verdade se esse flag estiver ativo
+  — applyPersisted(update): sincroniza draft E originalDraft juntos sempre que algo já
+    foi persistido (cover/fotos/vídeos) — corrige falso-positivo do dirty-check
+  — delete via ConfirmationDialog; erros via describeFirebaseError()
+  — cardCover (thumbnail da lista) em next/image fill; coverPreview (upload form)
+    continua <img> cru DE PROPÓSITO — mostra foto em tamanho natural sem cortar
 
-lib/
-  storage-service.ts      — uploadBytesResumable para vídeos com callback de progresso
-  attractions-service.ts  — setAttractionPhotos, setAttractionVideos, deleteAttraction
+components/days/days-manager.tsx — delete via ConfirmationDialog, erros via describeFirebaseError(),
+  labels com id/htmlFor, role="alert"
 
-components/
-  header.tsx / admin-nav.tsx  — hamburger ≤640px
-  attractions/attractions-manager.tsx   — CRUD de atrações + handlers de vídeo
-  photos/video-uploader.tsx / video-gallery.tsx
+components/trips/trip-card-grid.tsx — delete via ConfirmationDialog; capa em next/image fill
 
-.claude/commands/
-  deploy.md, deploy-template.md, verify.md, inicio.md, fim.md, ui-style-system.md
-  migrar-schema-firestore.md, novo-componente.md
+components/photos/photo-uploader.tsx — progresso real (%) via onProgress, igual ao VideoUploader
+components/photos/photo-gallery.tsx — fotos em next/image fill (novo wrapper .itemImage com
+  position:relative no CSS module, já que aspect-ratio estava no <img> direto)
+lib/storage-service.ts — uploadImage() agora usa uploadBytesResumable (progresso opcional);
+  uploadTripCover/uploadAttractionCover/uploadAttractionPhoto propagam onProgress
+lib/firebase-errors.ts (NOVO) — describeFirebaseError(err, fallback): traduz códigos comuns
+  Firestore/Storage (permission-denied, unavailable, storage/*), mesmo padrão de
+  translateAuthError em auth-utils.ts
+lib/trips-service.ts — deleteTrip() loga (console.error) falhas do cascade delete via
+  Promise.allSettled em vez de engolir em silêncio
 
-.claude/agents/
-  testador-golden-path.md — percorre golden paths via Chrome DevTools MCP (ferramenta nem sempre disponível, ver acima)
+components/confirmation-dialog.tsx — já existia, agora É USADO nos deletes de
+  viagem/dia/atração (antes só window.confirm/alert nativos)
 
-.claude/settings.json
-  hooks.PostToolUse — typecheck+lint automático em .ts/.tsx (não bloqueia)
-  hooks.PreToolUse  — exige confirmação para editar .env.local ou firestore.rules
+REMOVIDOS: components/attractions/attractions-manager-Casa.tsx,
+  components/photos/photo-uploader-Casa.tsx (órfãos, não importados em lugar nenhum)
+
+next.config.mjs — já tinha remotePatterns pra firebasestorage.googleapis.com, nenhuma
+  mudança necessária pro next/image
 ```
 
 ## Decisões tomadas
-- **Hero da VIAGEM (trip viewer) agora usa `object-fit: cover`** — preenche o hero sem letterbox, cropa fotos verticais. Isso **reverte** a decisão antiga ("nunca usar object-fit: cover no hero, sempre contain"); motivo: uso do app como portfólio/link compartilhado, primeira impressão mobile importa mais que ver a foto inteira. **A foto de capa da ATRAÇÃO não mudou** — continua em `contain` (mostra inteira, sem cortar).
-- **Navegação por dia na página pública**: pills sticky com scrollspy (`DayNav`) substituem o antigo dropdown "Todos os dias" — dropdown foi removido do `page.tsx`. Só aparece com 2+ dias.
-- **Compartilhamento**: botão único inteligente — `navigator.share()` se disponível (mobile), senão `navigator.clipboard.writeText()` + toast. Não usar botões separados por rede social.
-- **Skeleton de carregamento**: usa a animação `pulse` já existente em `globals.css` (opacity 1↔0.5) — não criar keyframe novo.
-- **Fluxo de trabalho para features novas**: brainstorming (spec em `docs/superpowers/specs/`) → writing-plans (plano em `docs/superpowers/plans/`) → executing-plans (branch + commits por task) → finishing-a-development-branch (PR). **Criar a branch de feature ANTES de commitar o spec/plano** — nesta sessão os 2 primeiros commits foram feitos na `main` local por engano, exigindo `git reset --hard origin/main` depois do squash-merge pra reconciliar (conteúdo não foi perdido, mas deu trabalho extra).
-- **PR sem `gh` CLI**: token do GitHub via Windows Credential Manager (P/Invoke `CredRead`), request direto pra API REST (`POST /repos/.../pulls`, `PUT /repos/.../pulls/{n}/merge` com `merge_method: squash`) via `Invoke-RestMethod` — usar `[System.Text.Encoding]::UTF8.GetBytes()` no body pra não corromper acentos.
-- **Branches locais squash-mergeadas**: `git branch -d` avisa "not fully merged" mesmo já estando 100% no `main` (comportamento normal do squash) — confirmar com `git diff origin/main..<branch> --stat` antes de forçar delete.
+- **Hero da viagem voltou a `object-fit: contain`** (PR #19) — reverte a decisão do PR #17 (`cover`). Pedido explícito do usuário. Capa de atração já era `contain` e não mudou.
+- **Paginação é client-side (render em janelas), não Firestore cursor-based** — `listTrips()` continua buscando tudo de uma vez; a busca do dashboard já é 100% client-side sobre o array completo, então paginar o fetch quebraria a busca. Resolve o problema real (DOM grande), não o de leituras do Firestore.
+- **Auditoria de UX de um agente externo ("codex"), 14 críticas — cada uma foi VERIFICADA contra o código real (3 subagents Explore, evidência arquivo:linha) antes de qualquer ação.** Resultado:
+  - **Infundada**: item 1 (textos corrompidos/mojibake) — zero ocorrências encontradas.
+  - **Fora de escopo por decisão do usuário**: item 8 (SSR das páginas públicas — precisa Firebase Admin SDK, credencial nova); item 10 (busca/paginação server-side — otimização prematura pra um diário pessoal).
+  - **Corrigidos** (10 PRs, #20–#29): itens 2,3,4,5,6,7,9,11,12(parte1),13,14 — ver seção 12 do CLAUDE.md pra lista completa por PR.
+  - **Adiado**: item 12 parte 2 (extrair hooks de trip-form-wizard.tsx/attractions-manager.tsx) — maior risco de regressão (sem testes), precisa de sessão dedicada com login pra verificação visual.
+- **`ConfirmationDialog` (já existia, nunca era usado) agora é o padrão de confirmação de delete** em todo o projeto — não usar mais `window.confirm`/`alert` nativos em fluxos novos.
+- **`describeFirebaseError()` (`lib/firebase-errors.ts`) é o padrão pra mensagens de erro** — tentar primeiro, cair pro fallback só se o código do erro não for reconhecido.
+- **`applyPersisted()` é o padrão em formulários com auto-save parcial** (upload que persiste antes do save explícito) — sempre sincronizar o "original" (baseline do dirty-check) junto com o draft quando algo já foi salvo no backend, senão gera falso-positivo de "não salvo".
+- **9 de 12 usos de `<img>` migrados pra `next/image`** — os 3 que sobraram (capa de atração/viagem no formulário, hero da página de atração) mostram a foto em proporção natural sem cortar; convertê-los exigiria fixar uma proporção e distorceria fotos não-4:3. Deixados como `<img>` de propósito, documentado no commit.
+- **PRs pequenos e temáticos, um por item da auditoria** (não agrupados por golden path) — 10 PRs sequenciais, cada um: branch → typecheck/lint → commit → push → PR via API REST → squash-merge → sync da main local → apagar branch.
 
 ## Regras e restrições
 - Nunca push direto em `main`
 - CSS Modules: sem seletores HTML bare, sempre classes
 - Cores sempre via `var(--nome)` — nunca hardcode
 - `createdAt` pode ser `string | Date | Timestamp` — usar `toDate()?.getTime() ?? 0`
-- Documentos Firestore antigos sem `videos` → tratar com `att.videos || []`
-- Mudança de schema Firestore → usar skill `/migrar-schema-firestore` (checklist obrigatório)
-- Editar `.env.local` ou `firestore.rules` → hook vai pedir confirmação explícita, é esperado
-- Antes de afirmar que testou algo no navegador, confirmar que as ferramentas de browser (Chrome DevTools MCP) estão realmente conectadas nesta sessão — não presumir
+- Mudança de schema Firestore → usar skill `/migrar-schema-firestore`
+- Editar `.env.local` ou `firestore.rules` → hook vai pedir confirmação explícita
+- **Sempre `git checkout -b` antes do primeiro Edit de uma tarefa nova** — não confiar em lembrar depois (quase virou incidente nesta sessão: commit caiu direto na `main` local, só não foi problema porque percebido antes do push)
+- Verificar `git diff origin/main --stat` antes de `git reset --hard` pra recuperar de erro de índice do git
 
 ## Estado atual
-- ✅ Auth, CRUD de viagens/dias/atrações, upload de fotos/vídeos, YouTube embed — em produção
-- ✅ Dark mode, PWA, responsividade mobile — em produção (PRs #12, #14, #15)
-- ✅ Automação Claude Code (hooks, skills, subagent, MCP context7) — em produção (PR #16)
-- ✅ **Melhoria de UX da página pública de viagem — em produção (PR #17, mergeado 2026-07-14)**: hero cover, skeleton, botão compartilhar, nav sticky por dia, filtros simplificados
-- ✅ Typecheck e lint passando sem erros em todas as mudanças
-- ⚠️ **Verificação visual em produção do PR #17 ainda NÃO foi feita** — implementado sem acesso a navegador nesta sessão; usuário disse que vai testar depois do deploy
-- ⚠️ 7 branches locais antigas não verificadas (lista nas Pendências)
+- ✅ Auth, CRUD de viagens/dias/atrações, upload de fotos/vídeos, YouTube embed — produção
+- ✅ Dark mode, PWA, responsividade mobile — produção (PRs #12, #14, #15)
+- ✅ Automação Claude Code (hooks, skills, subagent, MCP context7) — produção (PR #16)
+- ✅ UX da página pública de viagem (skeleton, compartilhar, nav sticky) — produção (PR #17)
+- ✅ Paginação client-side no dashboard admin — produção (PR #18)
+- ✅ Hero da viagem revertido pra `contain` (foto inteira, sem cortar) — produção (PR #19)
+- ✅ Auditoria de UX completa (10 PRs, #20–#29) — produção: link de rascunhos, ConfirmationDialog nas deleções, log de cascade delete, wizard valida steps, autosave explícito + cancelar real, upload de foto com progresso, mensagens de erro específicas, acessibilidade (labels + aria-live), next/image (9 pontos), código morto removido
+- ✅ Typecheck e lint passando em todas as mudanças
+- ⚠️ Golden paths autenticados (dashboard, wizard, CRUD) **não verificados visualmente** nesta sessão — sem credenciais de login
+- ⚠️ Header duplicado em `/viagens` — bug encontrado, não corrigido
+- ⚠️ Erro de console `Uncaught (in promise)` em `/viagens` — encontrado, causa não investigada
+- ⚠️ `trip-form-wizard.tsx` e `attractions-manager.tsx` continuam grandes (700/900 linhas) — extração em hooks desenhada mas não executada
 
 ## Pendências (em ordem de prioridade)
-1. **Testar visualmente em produção as 5 mudanças do PR #17** (hero sem barra preta, skeleton, botão compartilhar + toast, pills sticky com scrollspy, busca/filtro sem dropdown de dia) — usuário ficou de fazer isso
-2. Verificar e limpar branches locais antigas: `chore/skills-de-deploy`, `chore/verify-skill-e-regra-claude`, `design/arquivo-pessoal`, `fix/hero-foto-inteira`, `fix/layout-e-videos`, `fix/photo-upload-filelist`, `fix/storage-rules-videos`
-3. Testar os demais golden paths na URL de produção (usar subagent `testador-golden-path`, confirmando antes que o Chrome DevTools MCP está conectado)
-4. Paginação no dashboard (sem urgência, só quando houver 100+ viagens)
+1. **Extrair hooks de `trip-form-wizard.tsx` e `attractions-manager.tsx`** (useAttractionForm, useMediaUpload, useTripWizardForm) — precisa de sessão dedicada com login pra testar visualmente wizard completo + CRUD de atração depois do refactor
+2. Corrigir header duplicado em `/viagens` (nav do layout raiz + PublicHeader)
+3. Investigar erro de console `Uncaught (in promise)` em `/viagens`
+4. Testar os golden paths autenticados em produção com credenciais reais de login (nunca verificados visualmente nesta sessão)
+5. Converter `/viagens` e `/trips/[id]` pra Server Components (precisa Firebase Admin SDK — decisão explícita antes de começar)
+6. Reconsiderar busca/paginação server-side só se o app virar multiusuário (hoje é diário pessoal, sem urgência)

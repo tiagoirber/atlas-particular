@@ -187,7 +187,7 @@ These flows **must never break**. Test them manually before every deploy.
 - **Path**: Click "Publicar" or share public link → View public trip page
 - **Key sections**: Header, hero (foto em `cover` + botão compartilhar), navegação sticky por dias (scrollspy), itinerary timeline (by day), attractions, photos, tags
 - **Files**: `app/trips/[id]/page.tsx`, `trip-viewer.module.css`, `components/trips/share-button.tsx`, `components/trips/day-nav.tsx`
-- **Verification**: Public can view published trips (private trips blocked), timeline renders, images load, hero preenche sem letterbox, skeleton aparece no carregamento, botão compartilhar funciona (Web Share API ou fallback de clipboard + toast), pills de dia grudam e destacam o dia visível ao rolar
+- **Verification**: Public can view published trips (private trips blocked), timeline renders, images load, hero mostra a foto inteira sem cortar (`object-fit: contain`, revertido no PR #19), skeleton aparece no carregamento, botão compartilhar funciona (Web Share API ou fallback de clipboard + toast), pills de dia grudam e destacam o dia visível ao rolar
 
 ### 4.8 Trip Search & Filtering
 - **Path**: Dashboard → Search bar → Type / Filter by country, tags
@@ -391,6 +391,18 @@ Do **NOT** refactor, rename, or change these without explicit justification:
     - Se os docs de `docs/superpowers/specs/` e `docs/superpowers/plans/` forem commitados enquanto ainda na `main`, e só depois a branch de feature for criada a partir dela, esses commits ficam presos na `main` local. Depois do merge (squash) do PR, a `main` local diverge de `origin/main` e exige reconciliação manual (`git reset --hard origin/main`, após confirmar que o conteúdo já está no squash) — foi o que aconteceu no PR #17
     - **Why**: Evita divergência da `main` local e trabalho de reconciliação depois do merge; a branch deveria existir antes do primeiro commit da sessão de implementação
 
+13. **Sempre rodar `git checkout -b` ANTES do primeiro `Edit` de uma tarefa nova — nunca confiar em "vou lembrar depois"**
+    - Numa sessão com muitos PRs sequenciais (branch → commit → merge → `git checkout main` → próxima branch), é fácil, depois de voltar pra `main` pós-merge, esquecer de criar a próxima branch antes de já começar a editar — foi o que aconteceu na sessão de 2026-07-17 (PR de `next/image`, commit caiu direto na `main` local). Só não virou incidente porque foi percebido antes do `git push`: deu pra criar a branch em cima do commit (`git branch nome-da-branch <sha>`) e resetar a `main` local de volta pro `origin/main` sem perder nada
+    - **Why**: Depois do `push`, esse mesmo erro exigiria reescrever histórico remoto ou abrir PR direto da `main`, o que é bem mais arriscado. Checar `git branch --show-current` antes do primeiro `Edit` de cada nova tarefa é mais barato que corrigir depois
+
+14. **`git pull`/`git checkout` falhando com `error: unable to write new index file` é quase sempre travamento transitório do OneDrive/antivírus no `.git/index`, não corrupção real**
+    - Antes de qualquer ação corretiva, rodar `git diff origin/main --stat` (ou por arquivo) para confirmar que o working tree já bate com o conteúdo remoto — se a saída vier vazia (ou só diferença de CRLF/LF), é seguro rodar `git reset --hard origin/main` pra realinhar o ponteiro/index local sem perder nada
+    - **Why**: Aconteceu repetidamente na sessão de 2026-07-17 (a cada poucos merges); confirmar antes de resetar evita descartar trabalho de verdade por engano
+
+15. **Hook `pre:bash`/`pre:edit-write` de "Fact-Forcing Gate" (GateGuard) exige declarar importadores/API afetada/schema/instrução do usuário antes do primeiro `Bash`/`Edit`/`Write` em cada arquivo novo (e às vezes de novo depois de compactação de contexto)**
+    - Não é um bug — é proteção ativa neste ambiente. Resposta correta é declarar os fatos pedidos (breve, 1 linha por item) e repetir a chamada, não tentar contornar
+    - **Why**: Se não for esperado, cada bloqueio parece um erro; documentado aqui pra sessões futuras reconhecerem o padrão e responderem direto
+
 ---
 
 ## 9. Disciplina de Contexto
@@ -502,7 +514,7 @@ Mark these moments in your work:
 
 ## 12. Estado Atual & Próximos Passos
 
-### Current State (as of 2026-07-14)
+### Current State (as of 2026-07-17)
 
 ✅ **Implemented**:
 - Authentication (Firebase email/password)
@@ -526,19 +538,27 @@ Mark these moments in your work:
 - **PWA instalável** (manifest, service worker, ícones reais, offline fallback) (PR #14)
 - **Responsividade mobile corrigida** — hamburger menu no header/admin-nav, step indicators com scroll horizontal (PR #15)
 - **Automação Claude Code** (PR #16): hooks de typecheck/lint + proteção de arquivo sensível, skills `/migrar-schema-firestore` e `/novo-componente`, subagent `testador-golden-path`, MCP `context7` (instalado só localmente nesta máquina — não compartilhado via `.mcp.json`)
-- **Melhoria de UX da página pública de viagem** (PR #17, mergeado em 2026-07-14): hero em `object-fit: cover` (sem letterbox), skeleton de carregamento no lugar do texto "Carregando…", botão de compartilhar (Web Share API no mobile + fallback de clipboard/toast no desktop), navegação sticky por dias com scrollspy (`components/trips/day-nav.tsx`), dropdown de filtro por dia removido (redundante com a nav sticky) + alvo de toque maior nos controles mobile. Spec e plano em `docs/superpowers/specs/2026-07-13-trip-viewer-ux-design.md` e `docs/superpowers/plans/2026-07-13-trip-viewer-ux.md`
+- **Melhoria de UX da página pública de viagem** (PR #17, mergeado em 2026-07-14): skeleton de carregamento no lugar do texto "Carregando…", botão de compartilhar (Web Share API no mobile + fallback de clipboard/toast no desktop), navegação sticky por dias com scrollspy (`components/trips/day-nav.tsx`), dropdown de filtro por dia removido (redundante com a nav sticky) + alvo de toque maior nos controles mobile. Spec e plano em `docs/superpowers/specs/2026-07-13-trip-viewer-ux-design.md` e `docs/superpowers/plans/2026-07-13-trip-viewer-ux.md`
+- **Paginação client-side no dashboard admin** (PR #18): lista "Todas as viagens" renderiza em janelas de 24 (`PAGE_SIZE`), botão "Carregar mais"; busca já é 100% client-side sobre o array completo, então isso só limita o DOM renderizado, não o fetch
+- **Hero da viagem revertido para `object-fit: contain`** (PR #19, a pedido do usuário): reverte a decisão do PR #17 — a foto de capa da viagem volta a aparecer inteira, sem cortar, igual à capa de atração
+- **Auditoria de UX (10 PRs, #20–#29, mergeados em 2026-07-16/17)**: um agente externo revisou o código e listou 14 críticas; cada uma foi verificada com evidência (arquivo:linha) antes de qualquer fix. Corrigido: link morto "Ver todos os rascunhos" no dashboard (#20); `window.confirm`/`alert` trocado pelo `ConfirmationDialog` (já existia, nunca era usado) nas deleções de viagem/dia/atração (#21); `deleteTrip` loga falhas do cascade delete em vez de engolir em silêncio (#22); wizard de viagem valida steps intermediários antes de permitir pular via indicador e revalida antes de publicar (#23); autosave explícito (mensagem clara de que já foi persistido) + "Cancelar" na atração agora desfaz de verdade quando o registro só existia por causa de um upload + dirty-check não dá mais falso-positivo (`applyPersisted` sincroniza `originalDraft`) (#24); upload de foto ganhou progresso real em % via `uploadBytesResumable`, igual ao de vídeo (#25); novo helper `lib/firebase-errors.ts` (`describeFirebaseError`, mesmo padrão do `translateAuthError`) para mensagens de erro específicas (#26); acessibilidade — 25 campos com `id`/`htmlFor` pareados + `role="alert"`/`role="status"` em todas as mensagens do projeto (#27); 9 imagens migradas para `next/image` com `fill` (cards, hero, galeria, preview do wizard) — 3 pontos mantidos como `<img>` de propósito por mostrarem foto em tamanho natural sem cortar (#28); código morto removido — `attractions-manager-Casa.tsx`, `photo-uploader-Casa.tsx`, import de `useEffect` não usado (#29)
 
 ⚠️ **Known Issues**:
-- No pagination on large trip lists (could be slow 100+ trips)
-- Branches locais antigas (`chore/skills-de-deploy`, `chore/verify-skill-e-regra-claude`, `design/arquivo-pessoal`, `fix/hero-foto-inteira`, `fix/layout-e-videos`, `fix/photo-upload-filelist`, `fix/storage-rules-videos`) ainda não verificadas quanto a estarem mescladas — não deletar sem antes conferir `git diff origin/main..<branch> --stat`
 - `npm run build` local pode falhar com `SELF_SIGNED_CERT_IN_CHAIN` ao buscar as fontes do Google (`next/font`) — rede/antivírus da máquina interceptando TLS, não é bug do código. Não bloqueia deploy (Vercel builda sem esse problema); use `npm run typecheck` + `npm run lint` como verificação automatizada local
-- Ferramentas de browser (Chrome DevTools MCP, usadas pelo subagent `testador-golden-path`) nem sempre estão conectadas na sessão — confirmar que estão disponíveis (`ToolSearch`) antes de prometer verificação visual; se não estiverem, reportar isso explicitamente em vez de pular a verificação
+- Ferramentas de browser (Chrome DevTools MCP) nem sempre estão conectadas na sessão — confirmar que estão disponíveis (`ToolSearch`) antes de prometer verificação visual; se não estiverem, reportar isso explicitamente em vez de pular a verificação
+- **`resize_page` do Chrome DevTools MCP não funcionou na sessão de 2026-07-17** (viewport não mudava mesmo pedindo mobile) — provável causa de um subagent `testador-golden-path` anterior ter ficado em loop tirando screenshots. Confirmar se voltou a funcionar antes de pedir verificação de responsividade mobile via essa ferramenta
+- **`/viagens` renderiza dois headers empilhados** (nav do layout raiz + `PublicHeader` da própria página) — encontrado na sessão de 2026-07-17, não corrigido ainda
+- **Erro de console `Uncaught (in promise)` sem stack trace em `/viagens`** — encontrado na sessão de 2026-07-17, causa não investigada
+- `trip-form-wizard.tsx` (~700 linhas) e `attractions-manager.tsx` (~900 linhas) continuam com lógica de negócio (upload, validação, estado) misturada com JSX — extração pra hooks (`useAttractionForm`, `useMediaUpload`, `useTripWizardForm`) foi desenhada mas **não executada** (ver Immediate Next Steps)
 
 ### Immediate Next Steps
 
-1. **Verificar visualmente em produção as mudanças do PR #17** (hero sem barra preta, skeleton, botão compartilhar, navegação sticky por dias, filtros simplificados) — não foi possível testar no navegador na sessão que implementou (sem ferramentas de Chrome DevTools MCP disponíveis)
-2. Verificar e limpar as branches locais antigas listadas acima
-3. **Test the golden paths** on production Vercel URL (usar o subagent `testador-golden-path` ou testar manualmente, confirmando antes que as ferramentas de browser estão conectadas)
+1. **Extrair hooks de `trip-form-wizard.tsx` e `attractions-manager.tsx`** (parte 2 do item de componentes grandes da auditoria de UX) — precisa de sessão dedicada com credenciais de login pra testar visualmente o wizard completo e o CRUD de atração (criar, editar, upload, cancelar) depois do refactor, já que o projeto não tem suíte de testes
+2. Corrigir o header duplicado em `/viagens`
+3. Investigar o erro de console `Uncaught (in promise)` em `/viagens`
+4. Se algum dia o app virar multiusuário: reconsiderar item 10 da auditoria (busca/paginação hoje é 100% client-side, `listTrips()` sem `limit`/cursor — problema de isolamento entre usuários, não só performance)
+5. Converter `/viagens` e `/trips/[id]` para Server Components (item 8 da auditoria) — precisa de Firebase Admin SDK + service account (credencial nova), fora de escopo até decisão explícita
+6. **Test the golden paths** on production Vercel URL com credenciais de login reais — esta sessão não teve acesso a login (nem local nem produção), então os fluxos autenticados (dashboard, wizard, CRUD) não foram verificados visualmente, só por typecheck/lint
 
 ### Future Considerations
 
@@ -578,6 +598,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-07-14 (melhoria de UX da página pública de viagem — PR #17; lição sobre criar branch antes de commitar spec/plano)  
+**Last updated**: 2026-07-17 (paginação do dashboard, revert do hero pra `contain`, e auditoria de UX com 10 PRs #20–#29 — verificação com evidência antes de cada fix; lições sobre criar branch antes do primeiro edit e recuperação de `git pull`/index travado)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance
