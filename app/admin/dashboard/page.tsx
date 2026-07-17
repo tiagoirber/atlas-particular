@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useTrips } from "@/hooks/useTrips";
 import { useAuth } from "@/lib/auth-context";
@@ -89,8 +90,12 @@ function DashboardInner() {
           <Link href={`/admin/trips/${lastTrip.id}`} className={styles.lastVoyageCard}>
             {lastTrip.coverImageUrl && (
               <div className={styles.lastVoyageImage}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={lastTrip.coverImageUrl} alt={lastTrip.title} />
+                <Image
+                  src={lastTrip.coverImageUrl}
+                  alt={lastTrip.title}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 300px"
+                />
               </div>
             )}
             <div className={styles.lastVoyageContent}>
