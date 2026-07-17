@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useAttractions } from "@/hooks/useAttractions";
 import { useDays } from "@/hooks/useDays";
