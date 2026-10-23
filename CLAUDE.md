@@ -403,6 +403,11 @@ Do **NOT** refactor, rename, or change these without explicit justification:
     - Não é um bug — é proteção ativa neste ambiente. Resposta correta é declarar os fatos pedidos (breve, 1 linha por item) e repetir a chamada, não tentar contornar
     - **Why**: Se não for esperado, cada bloqueio parece um erro; documentado aqui pra sessões futuras reconhecerem o padrão e responderem direto
 
+16. **`git pull --ff-only` falhando com `fatal: Cannot fast-forward to multiple branches` é `FETCH_HEAD` velho, não divergência real**
+    - Acontece quando o `.git/FETCH_HEAD` guardou mais de uma entrada marcada pra merge (sobra de um fetch anterior). Correção: rodar `git fetch origin` (reescreve o `FETCH_HEAD` com só a branch atual marcada pra merge) e repetir o `git pull --ff-only` — na sessão de 2026-10-23 o pull seguinte retornou `Already up to date`
+    - Antes de qualquer coisa mais agressiva, confirmar com `git rev-list --left-right --count origin/main...HEAD`: se vier `0	0`, não há divergência nenhuma pra resolver
+    - **Why**: A mensagem sugere conflito de branches e leva a tentar reset/rebase sem necessidade
+
 ---
 
 ## 9. Disciplina de Contexto
@@ -556,9 +561,10 @@ Mark these moments in your work:
 1. **Extrair hooks de `trip-form-wizard.tsx` e `attractions-manager.tsx`** (parte 2 do item de componentes grandes da auditoria de UX) — precisa de sessão dedicada com credenciais de login pra testar visualmente o wizard completo e o CRUD de atração (criar, editar, upload, cancelar) depois do refactor, já que o projeto não tem suíte de testes
 2. Corrigir o header duplicado em `/viagens`
 3. Investigar o erro de console `Uncaught (in promise)` em `/viagens`
-4. Se algum dia o app virar multiusuário: reconsiderar item 10 da auditoria (busca/paginação hoje é 100% client-side, `listTrips()` sem `limit`/cursor — problema de isolamento entre usuários, não só performance)
-5. Converter `/viagens` e `/trips/[id]` para Server Components (item 8 da auditoria) — precisa de Firebase Admin SDK + service account (credencial nova), fora de escopo até decisão explícita
-6. **Test the golden paths** on production Vercel URL com credenciais de login reais — esta sessão não teve acesso a login (nem local nem produção), então os fluxos autenticados (dashboard, wizard, CRUD) não foram verificados visualmente, só por typecheck/lint
+4. **Confirmar no Firebase Console que o provedor Google está desabilitado** (Authentication → Sign-in method) — verificação manual pendente da seção 14; o app usa só e-mail/senha
+5. Se algum dia o app virar multiusuário: reconsiderar item 10 da auditoria (busca/paginação hoje é 100% client-side, `listTrips()` sem `limit`/cursor — problema de isolamento entre usuários, não só performance)
+6. Converter `/viagens` e `/trips/[id]` para Server Components (item 8 da auditoria) — precisa de Firebase Admin SDK + service account (credencial nova), fora de escopo até decisão explícita
+7. **Test the golden paths** on production Vercel URL com credenciais de login reais — esta sessão não teve acesso a login (nem local nem produção), então os fluxos autenticados (dashboard, wizard, CRUD) não foram verificados visualmente, só por typecheck/lint
 
 ### Future Considerations
 
@@ -588,6 +594,20 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
+## 14. Segurança — Aviso de OAuth client inativo (2026-10-23)
+
+O Google enviou e-mail avisando que o projeto `atlas-particular` tem **OAuth client(s) inativos há 5+ meses**, que serão deletados em 30 dias (com 30 dias extras pra restaurar depois disso).
+
+**Diagnóstico**: o app autentica **só com e-mail/senha** (`signInWithEmailAndPassword` em `lib/auth-utils.ts`). Busca no código por `GoogleAuthProvider`, `signInWithPopup`, `signInWithRedirect`, `oauth` e `client_id` retornou **zero ocorrências**. O OAuth client é o "Web client (auto created by Google Service)" que todo projeto Firebase ganha automaticamente e que aqui nunca foi usado.
+
+**Impacto da deleção: nenhum.** Login por e-mail/senha usa a Identity Toolkit API com a `NEXT_PUBLIC_FIREBASE_API_KEY` — caminho separado do OAuth client. Firestore e Storage também não dependem dele.
+
+**Decisão: não fazer nada, deixar deletar.** Se um dia o "Entrar com Google" for implementado, habilitar o provedor no Firebase Console recria o client.
+
+**Pendência de verificação manual** (não dá pra checar pelo código): confirmar no Firebase Console → Authentication → Sign-in method que o provedor **Google está desabilitado**. Se estiver habilitado sem uso no código, é superfície de ataque desnecessária — qualquer pessoa com conta Google poderia criar conta num app que deveria ser só do dono.
+
+---
+
 ## How to Use This File
 
 - **Before coding**: Read sections 6–8 (conventions, workflow, anti-patterns)
@@ -598,6 +618,6 @@ O GitHub enviou alerta de segurança: a chave de API do Firebase estava exposta 
 
 ---
 
-**Last updated**: 2026-07-17 (paginação do dashboard, revert do hero pra `contain`, e auditoria de UX com 10 PRs #20–#29 — verificação com evidência antes de cada fix; lições sobre criar branch antes do primeiro edit e recuperação de `git pull`/index travado)  
+**Last updated**: 2026-10-23 (sessão curta e sem mudança de código: diagnóstico do aviso do Google sobre OAuth client inativo — seção 14; e lição sobre `git pull --ff-only` falhando por `FETCH_HEAD` velho — item 16 da seção 8)  
 **Maintained by**: Tiago + Team  
 **Review frequency**: Update when patterns emerge or bugs are attributed to missing guidance

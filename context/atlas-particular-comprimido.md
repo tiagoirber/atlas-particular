@@ -1,5 +1,5 @@
 # Atlas Particular
-> Comprimido em: 2026-07-17 | Sessão: paginação do dashboard, revert do hero pra `contain`, e auditoria de UX (10 PRs #20–#29) com verificação por evidência antes de cada fix
+> Comprimido em: 2026-10-23 | Sessão: curta, sem mudança de código — `/inicio` (pull travado por `FETCH_HEAD` velho, resolvido) e diagnóstico do aviso do Google sobre OAuth client inativo
 
 ## Objetivo do projeto
 App de diário de viagens privado. Usuários registram viagens, documentam dias com fotos/vídeos e publicam uma página pública da viagem.
@@ -13,6 +13,9 @@ App de diário de viagens privado. Usuários registram viagens, documentam dias 
 - **Deploy via API**: skill `/deploy`; token via Windows Credential Manager (classe C# inline, trocar o nome da classe a cada uso na mesma sessão pra evitar erro de redefinição)
 - **`npm run build` local pode falhar** com `SELF_SIGNED_CERT_IN_CHAIN` (next/font) — não é bug, Vercel builda normal; usar `npm run typecheck` + `npm run lint` localmente
 - **Hook GateGuard ativo**: antes do primeiro `Bash`/`Edit`/`Write` em cada arquivo (às vezes de novo após compactação de contexto), exige declarar importadores/API afetada/schema/instrução do usuário em texto antes da chamada. Comandos destrutivos (`git reset --hard` etc.) exigem factos extras (o que muda, rollback, instrução verbatim). Responder e repetir a chamada — não é bug.
+- **`git pull --ff-only` falhando com `Cannot fast-forward to multiple branches`**: `FETCH_HEAD` velho com
+  várias entradas marcadas pra merge, não divergência. Rodar `git fetch origin` e repetir o pull.
+  Confirmar com `git rev-list --left-right --count origin/main...HEAD` — `0	0` = nada a resolver. (2026-10-23)
 - **`git pull`/`git checkout` falhando com `unable to write new index file`**: travamento transitório (OneDrive/AV no `.git/index`), não corrupção. Confirmar com `git diff origin/main --stat` (vazio ou só CRLF/LF) antes de `git reset --hard origin/main`.
 - **Chrome DevTools MCP**: `resize_page` não funcionou na sessão de 2026-07-17 (viewport não mudava) — provável causa de loop de screenshots num subagent anterior. Confirmar se voltou a funcionar antes de pedir verificação mobile.
 - **Sem credenciais de login nesta sessão** — nem local nem produção. Golden paths autenticados (dashboard, wizard, CRUD) só foram verificados por typecheck/lint, não visualmente.
@@ -87,6 +90,13 @@ next.config.mjs — já tinha remotePatterns pra firebasestorage.googleapis.com,
 - **`describeFirebaseError()` (`lib/firebase-errors.ts`) é o padrão pra mensagens de erro** — tentar primeiro, cair pro fallback só se o código do erro não for reconhecido.
 - **`applyPersisted()` é o padrão em formulários com auto-save parcial** (upload que persiste antes do save explícito) — sempre sincronizar o "original" (baseline do dirty-check) junto com o draft quando algo já foi salvo no backend, senão gera falso-positivo de "não salvo".
 - **9 de 12 usos de `<img>` migrados pra `next/image`** — os 3 que sobraram (capa de atração/viagem no formulário, hero da página de atração) mostram a foto em proporção natural sem cortar; convertê-los exigiria fixar uma proporção e distorceria fotos não-4:3. Deixados como `<img>` de propósito, documentado no commit.
+- **OAuth client inativo do Google: deixar deletar (2026-10-23).** O Google avisou que o projeto
+  `atlas-particular` tem OAuth client(s) sem uso há 5+ meses, com deleção em 30 dias. O app autentica
+  só com `signInWithEmailAndPassword` — busca por `GoogleAuthProvider`/`signInWithPopup`/
+  `signInWithRedirect`/`oauth`/`client_id` deu ZERO ocorrências. É o "Web client (auto created by
+  Google Service)" que todo projeto Firebase ganha e aqui nunca foi usado. Login e-mail/senha usa a
+  Identity Toolkit API com a API key, caminho separado — impacto da deleção: nenhum. Se um dia quiser
+  "Entrar com Google", habilitar o provedor no Firebase Console recria o client.
 - **PRs pequenos e temáticos, um por item da auditoria** (não agrupados por golden path) — 10 PRs sequenciais, cada um: branch → typecheck/lint → commit → push → PR via API REST → squash-merge → sync da main local → apagar branch.
 
 ## Regras e restrições
@@ -117,6 +127,9 @@ next.config.mjs — já tinha remotePatterns pra firebasestorage.googleapis.com,
 1. **Extrair hooks de `trip-form-wizard.tsx` e `attractions-manager.tsx`** (useAttractionForm, useMediaUpload, useTripWizardForm) — precisa de sessão dedicada com login pra testar visualmente wizard completo + CRUD de atração depois do refactor
 2. Corrigir header duplicado em `/viagens` (nav do layout raiz + PublicHeader)
 3. Investigar erro de console `Uncaught (in promise)` em `/viagens`
-4. Testar os golden paths autenticados em produção com credenciais reais de login (nunca verificados visualmente nesta sessão)
-5. Converter `/viagens` e `/trips/[id]` pra Server Components (precisa Firebase Admin SDK — decisão explícita antes de começar)
-6. Reconsiderar busca/paginação server-side só se o app virar multiusuário (hoje é diário pessoal, sem urgência)
+4. **Verificação manual**: confirmar no Firebase Console → Authentication → Sign-in method que o
+   provedor Google está DESABILITADO (o app usa só e-mail/senha; provedor ligado sem uso = superfície
+   de ataque). Não dá pra checar pelo código.
+5. Testar os golden paths autenticados em produção com credenciais reais de login (nunca verificados visualmente nesta sessão)
+6. Converter `/viagens` e `/trips/[id]` pra Server Components (precisa Firebase Admin SDK — decisão explícita antes de começar)
+7. Reconsiderar busca/paginação server-side só se o app virar multiusuário (hoje é diário pessoal, sem urgência)
